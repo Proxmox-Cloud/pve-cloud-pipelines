@@ -40,3 +40,9 @@ these tags are reused so we have to force push them for example `git tag -f rele
 
 these tags will release and update all dependant projects, update dependencies and trigger a release there aswell, meaning if you made changes to the pve_cloud collection and the py-pve-cloud package, it is enough push a release tag to the package.
 
+
+
+```bash
+docker build . -t tobiashvmz/pve-cloud-ci:latest
+docker push tobiashvmz/pve-cloud-ci
+```
