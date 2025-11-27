@@ -9,7 +9,7 @@ release_tag:
 
     # get the latest tag => default to 0.0.0
     - |
-      tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$')
+      tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
       if [ -z "$tags" ]; then
         latest_tag="0.0.0"
       else
