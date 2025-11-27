@@ -66,6 +66,11 @@ trigger_version_tag:
     - release_tag
   script:
     - source tag.env
+    - echo $INCLUDING_JOB_TOKEN
+    - echo $NEW_TAG
+    - echo $INCLUDING_PROJECT_ID
+    - echo $CI_API_V4_URL
+    
     # trigger the new pipeline manually as the ci token cannot https://gitlab.com/gitlab-org/gitlab/-/issues/569974
     - |
       curl --request POST \
