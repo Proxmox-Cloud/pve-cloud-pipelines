@@ -69,7 +69,7 @@ trigger_version_tag:
     # trigger the new pipeline manually as the ci token cannot https://gitlab.com/gitlab-org/gitlab/-/issues/569974
     - |
       curl --request POST \
-        --form "token=${CI_JOB_TOKEN}" \
+        --form "token=${INCLUDING_JOB_TOKEN}" \
         --form "ref=${NEW_TAG}" \
         "${CI_API_V4_URL}/projects/${INCLUDING_PROJECT_ID}/trigger/pipeline"
   rules:
@@ -100,6 +100,6 @@ trigger_version_tag:
   script:
     - |
       curl --request POST \
-        --form "token=${CI_JOB_TOKEN}" \
+        --form "token=${INCLUDING_JOB_TOKEN}" \
         --form "ref=${UPSTREAM_TAG_MESSAGE}" \
         "${CI_API_V4_URL}/projects/${INCLUDING_PROJECT_ID}/trigger/pipeline"
