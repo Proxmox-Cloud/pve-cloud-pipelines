@@ -6,7 +6,7 @@ This repository contains pipeline definitions used in our private gitlab that is
 
 * create `PYPI_TOKEN` and `DOCKER_AUTH_CONFIG_B64` gitlab ci variables for the pve-cloud repository group.
 
-the docker auth variable can be formatted using this bash script:
+The docker auth variable can be formatted using this bash script:
 
 ```bash
 TOKEN=
@@ -32,15 +32,15 @@ EOF
 
 ## Releasing
 
-after having build and tested everything locally (using tdd e2e tests), commit all your changes and use the following tags as triggers for a release:
+After having build and tested everything locally (using tdd e2e tests), commit all your changes and use the following tags as triggers for a release:
 
 * `release-patch` / `release-minor` / `release-major` 
 
-these tags are reused so we have to force push them for example `git tag -f release-patch && git push -f origin release-patch`.
+These tags are reused so we have to force push them for example `git tag -f release-patch && git push -f origin release-patch`.
 
-these tags will release and update all dependant projects, update dependencies and trigger a release there aswell, meaning if you made changes to the pve_cloud collection and the py-pve-cloud package, it is enough push a release tag to the package.
+These tags will release and update all dependant projects, update dependencies and trigger a release there aswell. That means if you made changes to the pve_cloud collection and the py-pve-cloud package, it is enough push a release tag to the package.
 
-
+## Publish ci image
 
 ```bash
 docker build . -t tobiashvmz/pve-cloud-ci:latest
