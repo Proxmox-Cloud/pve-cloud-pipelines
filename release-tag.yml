@@ -67,7 +67,11 @@ trigger_version_tag:
   script:
     - source tag.env
     # trigger the new pipeline manually as the ci token cannot https://gitlab.com/gitlab-org/gitlab/-/issues/569974
-    - echo Y3VybCAtLXJlcXVlc3QgUE9TVCBcCiAgLS1mb3JtICJ0b2tlbj0ke0NJX0pPQl9UT0tFTn0iIFwKICAtLWZvcm0gInJlZj0ke05FV19UQUd9IiBcCiAgIiR7Q0lfQVBJX1Y0X1VSTH0vcHJvamVjdHMvJHtDSV9QUk9KRUNUX0lEfS90cmlnZ2VyL3BpcGVsaW5lIg== | base64 -d | sh
+    - |
+      curl --request POST \
+        --form "token=${CI_JOB_TOKEN}" \
+        --form "ref=${NEW_TAG}" \
+        "${CI_API_V4_URL}/projects/${INCLUDING_PROJECT_ID}/trigger/pipeline"
   rules:
     - if: '$CI_COMMIT_TAG =~ /^release-[a-z]+$/'
 
@@ -86,6 +90,7 @@ trigger_version_tag:
     - git tag -f $UPSTREAM_TAG_MESSAGE
     - git push -f origin $UPSTREAM_TAG_MESSAGE
 
+
 .upstream-trigger:
   image: alpine/git:v2.49.1
 
@@ -97,4 +102,4 @@ trigger_version_tag:
       curl --request POST \
         --form "token=${CI_JOB_TOKEN}" \
         --form "ref=${UPSTREAM_TAG_MESSAGE}" \
-        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/trigger/pipeline"
+        "${CI_API_V4_URL}/projects/${INCLUDING_PROJECT_ID}/trigger/pipeline"
