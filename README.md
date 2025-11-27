@@ -1,11 +1,8 @@
+# Gitlab CI Pipelines - pve-cloud-pipelines
 
-## Publishing / CI
+This repository contains pipeline definitions used in our private gitlab that is used for building all artifacts of this project.
 
-After having successfully tested, there are gitlab pipelines for publishing to official registries (this section now is only relevant for maintainers). Please read the [Contributing Section](./contributing.md) and open a pr.
-
-All projects come with gitlab ci pipelines that trigger into required downstream repos.
-
-### Setup CI
+## Setup CI
 
 * create `PYPI_TOKEN` and `DOCKER_AUTH_CONFIG_B64` gitlab ci variables for the pve-cloud repository group.
 
@@ -33,7 +30,7 @@ EOF
 * add `*.*.*` as protected tag pattern under Repository settings in gitlab for each repository with a pipeline.
 * allow job ci tokens to make push changes to the repositories, CI/CD settings => Job token permissions => Allow git push
 
-### Releasing
+## Releasing
 
 after having build and tested everything locally (using tdd e2e tests), commit all your changes and use the following tags as triggers for a release:
 
