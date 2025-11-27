@@ -45,6 +45,6 @@ git push origin "$new_tag"
 # manually trigger the pipeline that should have been invoked by pushing the tag
 # gitlab ci is ass
 curl --request POST \
---form "token=${CI_JOB_TOKEN}" \
---form "ref=${new_tag}" \
-"${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/trigger/pipeline"
+  --form "token=${CI_JOB_TOKEN}" \
+  --form "ref=${new_tag}" \
+  "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/trigger/pipeline"
