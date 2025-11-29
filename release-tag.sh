@@ -42,6 +42,8 @@ echo $new_tag
 git tag "$new_tag" -m "$CI_COMMIT_TAG"
 git push origin "$new_tag"
 
+sleep 10 # small buffer for gitlab api
+
 # manually trigger the pipeline that should have been invoked by pushing the tag
 # gitlab ci is ass
 curl --request POST \
