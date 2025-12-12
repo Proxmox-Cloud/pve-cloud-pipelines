@@ -43,6 +43,7 @@ These tags will release and update all dependant projects, update dependencies a
 ## Publish ci image
 
 ```bash
-docker build . -t tobiashvmz/pve-cloud-ci:latest
-docker push tobiashvmz/pve-cloud-ci
+VERSION=$(date +"%Y%m%d%H")
+docker build . -t tobiashvmz/pve-cloud-ci:$VERSION
+docker push tobiashvmz/pve-cloud-ci:$VERSION
 ```
