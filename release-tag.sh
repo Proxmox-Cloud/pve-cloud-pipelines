@@ -18,19 +18,17 @@ major=$(echo "$latest_tag" | cut -d '.' -f 1)
 minor=$(echo "$latest_tag" | cut -d '.' -f 2)
 patch=$(echo "$latest_tag" | cut -d '.' -f 3)
 
-increment=${CI_COMMIT_TAG#release-}
-
-if [ "$increment" == "major" ]; then
+if [[ "$CI_COMMIT_TAG" == *"-major" ]]; then
   major=$((major + 1))
   minor=0
   patch=0
-elif [ "$increment" == "minor" ]; then
+elif [[ "$CI_COMMIT_TAG" == *"-minor" ]]; then
   minor=$((minor + 1))
   patch=0
-elif [ "$increment" == "patch" ]; then
+elif [[ "$CI_COMMIT_TAG" == *"-patch" ]]; then
   patch=$((patch + 1))
 else
-  echo "Unknown increment type: $increment"
+  echo "Unknown increment type: $CI_COMMIT_TAG"
   exit 1
 fi
 

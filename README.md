@@ -32,13 +32,17 @@ EOF
 
 ## Releasing
 
-After having build and tested everything locally (using tdd e2e tests), commit all your changes and use the following tags as triggers for a release:
+After having build and tested everything locally (using tdd e2e tests), commit all your changes. Using the following tags you can trigger different kinds of releases.
 
 * `release-patch` / `release-minor` / `release-major` 
 
 These tags are reused so we have to force push them for example `git tag -f release-patch && git push -f origin release-patch`.
 
-These tags will release and update all dependant projects, update dependencies and trigger a release there aswell. That means if you made changes to the pve_cloud collection and the py-pve-cloud package, it is enough push a release tag to the package.
+These tags will release and update all dependant projects, without triggering a full release there. It will simply update its version and commit.
+
+* `release-all-patch` / `release-all-minor` / `release-all-major` 
+
+Using this will not only update the version but also trigger an equivalent in all the downstream repositories aswell.
 
 ## Publish ci image
 

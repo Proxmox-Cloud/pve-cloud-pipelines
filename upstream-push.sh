@@ -9,7 +9,10 @@ git add .
 git commit -m "$1"
 git push origin HEAD:master
 
-# tag & push
 echo $UPSTREAM_TAG_MESSAGE
-git tag -f $UPSTREAM_TAG_MESSAGE
-git push -f origin $UPSTREAM_TAG_MESSAGE
+
+# only trigger tag push on -all- release tags
+if [[ "$UPSTREAM_TAG_MESSAGE" == *"-all-"* ]]; then
+    git tag -f $UPSTREAM_TAG_MESSAGE
+    git push -f origin $UPSTREAM_TAG_MESSAGE
+fi
