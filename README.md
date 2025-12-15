@@ -4,7 +4,7 @@ This repository contains pipeline definitions used in our private gitlab that is
 
 ## Setup CI
 
-* create `PYPI_TOKEN` and `DOCKER_AUTH_CONFIG_B64` gitlab ci variables for the pve-cloud repository group.
+* create `PYPI_TOKEN`, `DOCKER_AUTH_CONFIG_B64` and `ANSIBLE_GALAXY_TOKEN` gitlab ci variables for the pve-cloud repository group.
 
 The docker auth variable can be formatted using this bash script:
 
