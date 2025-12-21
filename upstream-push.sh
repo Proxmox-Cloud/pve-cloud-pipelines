@@ -4,6 +4,13 @@ set -e
 git config --global user.name "$GITLAB_USER_NAME"
 git config --global user.email "$GITLAB_USER_EMAIL"
 
+# this is needed for pipeline paralellism for other artifacts
+git fetch origin
+git merge origin/master || {
+    echo "Merge conflicts detected, aborting."
+    exit 1
+}
+
 # commit and push (child can insert sed before this)
 git add .
 git commit -m "$1"
