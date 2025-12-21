@@ -30,6 +30,26 @@ EOF
 * add `*.*.*` as protected tag pattern under Repository settings in gitlab for each repository with a pipeline.
 * allow job ci tokens to make push changes to the repositories, CI/CD settings => Job token permissions => Allow git push
 
+### Terraform registry
+
+As the public registry forces github use (...) we need to set `GITHUB_TOKEN` in GITLAB ci and let our ci handle interacting with github.
+
+
+* create a gpg key signing terraform artifacts
+
+```bash
+gpg --full-generate-key # choose (1) RSA and RSA, 4096 size
+# take a passphrase with no special characters that might interfere with
+# bash scripting
+
+gpg --list-keys # to get the id/fingerprint
+# set GPG_FINGERPRINT ci var
+
+gpg --armor --export-secret-keys KEYID # | base64 -w 0 export the private key for use in ci
+# also save in secret manager of your choice alongside passphrase
+# => add CI variable GPG_EXPORTED_KEY_B64 and GPG_PASSPHRASE
+```
+
 ## Releasing
 
 After having build and tested everything locally (using tdd e2e tests), commit all your changes. Using the following tags you can trigger different kinds of releases.
