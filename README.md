@@ -64,7 +64,7 @@ These tags will release and update all dependant projects, without triggering a 
 
 Using this will not only update the version but also trigger an equivalent in all the downstream repositories aswell.
 
-If you are unsure what you changed and want to just do a full release of all the artificats, do a normal `release-patch` on `pve-cloud-schemas` and on `pve-cloud-backup` followed by a `release-all-patch` on `py-pve-cloud`.
+If you are unsure what you changed and want to just do a full release of all the artificats, do a normal `release-patch` on `pve-cloud-schemas` followed by a `release-all-patch` on `py-pve-cloud`.
 
 ## Publish ci image
 
