@@ -56,7 +56,7 @@ After having build and tested everything locally (using tdd e2e tests), commit a
 
 * `release-patch` / `release-minor` / `release-major` 
 
-These tags are reused so we have to force push them for example `git tag -f release-patch && git push -f origin release-patch`.
+These tags are reused so we have to force push them for example `git pull && git tag -f release-patch && git push -f origin release-patch`. We need to pull first to get changes from the formatting / cleanup pipelines.
 
 These tags will release and update all dependant projects, without triggering a full release there. It will simply update its version and commit.
 
