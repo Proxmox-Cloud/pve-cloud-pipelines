@@ -4,6 +4,8 @@ This repository contains pipeline definitions used in our private gitlab that is
 
 ## Setup CI
 
+Gitlab runners need to be priviledged to support podman builds via ci.
+
 * create `PYPI_TOKEN`, `DOCKER_AUTH_CONFIG_B64` and `ANSIBLE_GALAXY_TOKEN` gitlab ci variables for the pve-cloud repository group.
 
 The docker auth variable can be formatted using this bash script:
@@ -33,7 +35,6 @@ EOF
 ### Terraform registry
 
 As the public registry forces github use (...) we need to set `GITHUB_TOKEN` in GITLAB ci and let our ci handle interacting with github.
-
 
 * create a gpg key signing terraform artifacts
 
