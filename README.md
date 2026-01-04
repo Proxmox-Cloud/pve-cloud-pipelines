@@ -66,10 +66,16 @@ Using this will not only update the version but also trigger an equivalent in al
 
 If you are unsure what you changed and want to just do a full release of all the artificats, do a normal `release-patch` on `pve-cloud-schemas` followed by a `release-all-patch` on `py-pve-cloud`.
 
-## Publish ci image
+## Publish ci images
 
 ```bash
 VERSION=$(date +"%Y%m%d%H")
-docker build . -t tobiashvmz/pve-cloud-ci:$VERSION
+docker build -f Dockerfile.ci . -t tobiashvmz/pve-cloud-ci:$VERSION
 docker push tobiashvmz/pve-cloud-ci:$VERSION
+```
+
+```bash
+VERSION=$(date +"%Y%m%d%H")
+docker build -f Dockerfile.pyci . -t tobiashvmz/pve-cloud-pyci:$VERSION
+docker push tobiashvmz/pve-cloud-pyci:$VERSION
 ```
