@@ -70,13 +70,13 @@ If you are unsure what you changed and want to just do a full release of all the
 ## Publish ci images
 
 ```bash
-VERSION=$(date +"%Y%m%d%H")
+VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.ci . -t tobiashvmz/pve-cloud-ci:$VERSION
 docker push tobiashvmz/pve-cloud-ci:$VERSION
 ```
 
 ```bash
-VERSION=$(date +"%Y%m%d%H")
+VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.pyci . -t tobiashvmz/pve-cloud-pyci:$VERSION
 docker push tobiashvmz/pve-cloud-pyci:$VERSION
 ```
