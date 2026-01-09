@@ -5,36 +5,17 @@ set -e
 git config --global user.name "$GITLAB_USER_NAME"
 git config --global user.email "$GITLAB_USER_EMAIL"
 
-# get the latest tag => default to 0.0.0
-tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
-if [ -z "$tags" ]; then
-  latest_tag="0.0.0"
-else
-  latest_tag=$(echo "$tags" | sort -V | tail -n 1)
-fi
-
-# split the tag and increment
-major=$(echo "$latest_tag" | cut -d '.' -f 1)
-minor=$(echo "$latest_tag" | cut -d '.' -f 2)
-patch=$(echo "$latest_tag" | cut -d '.' -f 3)
-
-if [[ "$CI_COMMIT_TAG" == *"-major" ]]; then
-  major=$((major + 1))
-  minor=0
-  patch=0
-elif [[ "$CI_COMMIT_TAG" == *"-minor" ]]; then
-  minor=$((minor + 1))
-  patch=0
-elif [[ "$CI_COMMIT_TAG" == *"-patch" ]]; then
-  patch=$((patch + 1))
-else
-  echo "Unknown increment type: $CI_COMMIT_TAG"
-  exit 1
-fi
-
-new_tag="$major.$minor.$patch"
-
+# determine the new tag based on release-patch/minor/major
+new_tag=$(/scripts/get-new-tag.sh)
 echo $new_tag
+
+# cleanup delete rc tags
+if git ls-remote --heads origin | grep -q "refs/heads/${new_tag}-rc"; then
+  echo "deleting rc release branch ${new_tag}-rc"
+  git push origin --delete "${new_tag}-rc"
+else
+  echo "no rc branch found! prod release without rc first?"
+fi
 
 # tag and push => created by job ci token, will not trigger the tag released pipeline
 git tag "$new_tag" -m "$CI_COMMIT_TAG"
