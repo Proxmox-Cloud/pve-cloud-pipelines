@@ -55,17 +55,23 @@ gpg --armor --export-secret-keys KEYID # | base64 -w 0 export the private key fo
 
 After having build and tested everything locally (using tdd e2e tests), commit all your changes. Using the following tags you can trigger different kinds of releases.
 
+Use `git pull && git tag -f $TAG && git push -f origin $TAG` to trigger a release. Dependant projects are automatically build.
+
+* `rc-patch` / `rc-minor` / `rc-major`
+
+This will take the latest full release and increment it based on the tag name, it will create new branches with `rcN` dependencies starting from `rc0`.
+
+Meaning if the last release was `1.0.0` and you choose `rc-patch` it will create `1.0.1-rc0`.
+
+Each time you tag again it will increment and release `rc1`, `rc2` and so forth.
+
 * `release-patch` / `release-minor` / `release-major` 
 
-These tags are reused so we have to force push them for example `git pull && git tag -f release-patch && git push -f origin release-patch`. We need to pull first to get changes from the formatting / cleanup pipelines.
+This triggers a final production release. It will cleanup any rc branches that fit the same version. 
 
-These tags will release and update all dependant projects, without triggering a full release there. It will simply update its version and commit.
+! An rc-patch needs to be followed by and release-patch. There are no guardrails!
 
-* `release-all-patch` / `release-all-minor` / `release-all-major` 
-
-Using this will not only update the version but also trigger an equivalent in all the downstream repositories aswell.
-
-If you are unsure what you changed and want to just do a full release of all the artificats, do a normal `release-patch` on `pve-cloud-schemas` followed by a `release-all-patch` on `py-pve-cloud`.
+The project [pve-cloud-schemas](https://github.com/Proxmox-Cloud/pve-cloud-schemas) does not have rc pipelines and also doesnt trigger any downstream builds.
 
 ## Publish ci images
 
