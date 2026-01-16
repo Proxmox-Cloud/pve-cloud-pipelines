@@ -86,3 +86,9 @@ VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.pyci . -t tobiashvmz/pve-cloud-pyci:$VERSION
 docker push tobiashvmz/pve-cloud-pyci:$VERSION
 ```
+
+```bash
+VERSION=$(date +"%Y%m%d%H%M")
+docker build -f Dockerfile.goci . -t tobiashvmz/pve-cloud-goci:$VERSION
+docker push tobiashvmz/pve-cloud-goci:$VERSION
+```
