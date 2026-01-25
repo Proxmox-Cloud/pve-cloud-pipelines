@@ -3,3 +3,7 @@ FROM goreleaser/goreleaser:v2.13.3
 RUN apk add gpg-agent
 
 RUN wget https://releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_amd64.zip && unzip terraform_1.14.3_linux_amd64.zip && mv terraform /usr/bin
+
+WORKDIR /scripts
+
+COPY *.sh ./

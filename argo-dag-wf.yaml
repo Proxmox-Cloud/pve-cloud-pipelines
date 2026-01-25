@@ -1,0 +1,250 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: release-pxc-
+spec:
+  entrypoint: graph
+  volumes:
+    # secrets for pushing and pulling to various services
+    - name: pxc-ci-secrets
+      secret:
+        secretName: pxc-ci-secrets
+        defaultMode: 0600
+  arguments:
+    parameters:
+      # build scripts switch on these parameters
+      - name: git_host
+        value: "" # gitlab.example.com
+      - name: git_pull_prefix
+        value: "" # git@gitlab.example.com:pve-cloud-group
+      - name: git_user
+        value: ""
+      - name: git_email
+        value: ""
+      - name: build_increment
+        value: "" # major / minor / patch
+      - name: build_type
+        value: "" # rc / release
+  serviceAccountName: argo-workflow 
+  templates:
+    - name: graph
+      dag:
+        tasks:
+          - name: py-pve-cloud
+            template: build-py-pve-cloud
+
+          - name: pve-cloud-backup
+            template: build-pve-cloud-backup
+            dependencies: [py-pve-cloud]
+
+          # - name: terraform-provider-pxc
+          #   template: build-terradform-provider-pxc
+          #   dependencies: [py-pve-cloud]
+
+          # - name: terraform-pxc-backup
+          #   dependencies: [pve-cloud-backup, terraform-provider-pxc]
+
+    # each template always does the following:
+    # - build its own version based on increment (switch / create rc branch when rc build type)
+    # - cleanup rc branch on full release
+    # - checkout all its downstream repositories and commit new version (create rc branch and commit there if rc build type)
+
+    # py-pve-cloud
+    - name: build-py-pve-cloud
+      script:
+        image: tobiashvmz/pve-cloud-pyci:202601251846
+        command: [bash]
+        volumeMounts:
+          # pulling gitlab currently only works with ed25519 key
+          - name: pxc-ci-secrets
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+        env:
+          - name: PYPI_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: pxc-ci-secrets
+                key: pypi_token
+        source: |
+          #!/bin/bash
+          set -e
+
+          # set git user / email for creating commits
+          git config --global user.name "{{workflow.parameters.git_user}}"
+          git config --global user.email "{{workflow.parameters.git_email}}"
+
+          # trust host for ssh pulls
+          ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
+
+          # clone core repo
+          git clone {{workflow.parameters.git_pull_prefix}}/py-pve-cloud.git && cd py-pve-cloud
+
+          # init build / get new incremented tag
+          build_tag=$(/scripts/init-build.sh {{workflow.parameters.build_increment}} {{workflow.parameters.build_type}})
+          echo "new build tag: $build_tag"
+
+          # generic pypi build script, also creates tag and pushes
+          /scripts/build-pypi.sh $build_tag py-pve-cloud pve_cloud
+          
+          # now we update the downstream repos
+          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve-cloud-backup.git && cd pve-cloud-backup
+
+          if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
+            # determine down stream tag and create / switch to rc branch
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            git checkout $new_tag-rc || git checkout -b $new_tag-rc
+
+            # commit rc version on rc branch
+            sed -i "s/^py-pve-cloud.*$/py-pve-cloud==${build_tag//-/}/" requirements.txt
+            git add requirements.txt
+
+            git commit -m "Set py-pve-cloud rc version to ${build_tag//-/}"
+            git push origin $new_tag-rc
+
+          elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
+            # for prod releases we simply commit the new version into the master branch
+
+            # use pessimistic constraint for e2e tests and some flexibility on prod
+            PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
+            sed -i "s/^py-pve-cloud>=.*$/py-pve-cloud>=${build_tag},<${PESSIMISTIC_CONSTRAINT}/" requirements.txt
+            git add requirements.txt
+
+            git commit -m "Update py-pve-cloud version to $build_tag (pessimistic)"
+            git push origin master
+          fi
+
+
+    # pve-cloud-backup
+    - name: build-pve-cloud-backup
+      steps:
+        - - name: init-pve-cloud-backup
+            template: init-pve-cloud-backup
+        - - name: build-pve-cloud-backup-pypi
+            template: build-pve-cloud-backup-pypi
+            arguments:
+              parameters:
+              - name: build-tag
+                value: "{{steps.init-pve-cloud-backup.outputs.parameters.build-tag}}"
+          - name: build-pve-cloud-backup-image
+            template: build-pve-cloud-backup-image
+            arguments:
+              parameters:
+              - name: build-tag
+                value: "{{steps.init-pve-cloud-backup.outputs.parameters.build-tag}}"
+
+    # this pipeline simply creates the tag / rc branch + tag and returns it for the actual build pipelines
+    - name: init-pve-cloud-backup
+      script:
+        image: tobiashvmz/pve-cloud-ci:202601251918
+        command: [bash]
+        volumeMounts:
+          # pulling gitlab currently only works with ed25519 key
+          - name: pxc-ci-secrets
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+        source: |
+          #!/bin/bash
+          set -e
+
+          # set git user / email for creating commits
+          git config --global user.name "{{workflow.parameters.git_user}}"
+          git config --global user.email "{{workflow.parameters.git_email}}"
+
+          # trust host for ssh pulls
+          ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
+
+          git clone {{workflow.parameters.git_pull_prefix}}/pve-cloud-backup.git && cd pve-cloud-backup
+
+          build_tag=$(/scripts/init-build.sh {{workflow.parameters.build_increment}} {{workflow.parameters.build_type}})
+
+          echo $build_tag > /tmp/build-tag
+
+      outputs:
+        parameters:
+          - name: build-tag
+            valueFrom:
+              path: /tmp/build-tag
+
+    # build pipelines that consume the tag
+    - name: build-pve-cloud-backup-pypi
+      inputs:
+        parameters:
+        - name: build-tag
+      script:
+        image: tobiashvmz/pve-cloud-pyci:202601251846
+        command: [bash]
+        volumeMounts:
+          # pulling gitlab currently only works with ed25519 key
+          - name: pxc-ci-secrets
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+        env:
+          - name: PYPI_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: pxc-ci-secrets
+                key: pypi_token
+        source: |
+          #!/bin/bash
+          set -e
+
+          # trust host for ssh pulls
+          ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
+
+          # checkout repo at build tag
+          git clone --branch {{inputs.parameters.build-tag}} --depth 1 {{workflow.parameters.git_pull_prefix}}/pve-cloud-backup.git && cd pve-cloud-backup
+
+          /scripts/build-pypi.sh {{inputs.parameters.build-tag}} py-pve-cloud-backup pve_cloud_backup
+
+    - name: build-pve-cloud-backup-image
+      inputs:
+        parameters:
+        - name: build-tag
+      script:
+        image: quay.io/podman/stable:v5.7.1
+        command: [bash]
+        securityContext:
+          privileged: true
+        env:
+          - name: DOCKER_AUTH_CONFIG_B64
+            valueFrom:
+              secretKeyRef:
+                name: pxc-ci-secrets
+                key: docker_auth_config_b64
+        volumeMounts:
+          # pulling gitlab currently only works with ed25519 key
+          - name: pxc-ci-secrets
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+        source: |
+          #!/bin/bash
+          set -e
+
+          # trust host for ssh pulls
+          ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
+
+          # checkout repo at build tag
+          git clone --branch {{inputs.parameters.build-tag}} --depth 1 {{workflow.parameters.git_pull_prefix}}/pve-cloud-backup.git && cd pve-cloud-backup
+
+          mkdir -p /root/.config/containers
+          echo $DOCKER_AUTH_CONFIG_B64 | base64 -d > /root/.config/containers/auth.json
+          echo "__version__ = \"{{inputs.parameters.build-tag}}\"" > src/pve_cloud_backup/_version.py # dynamic versioning
+          podman build --layers --cache-from tobiashvmz/pve-cloud-backup-cache --cache-to tobiashvmz/pve-cloud-backup-cache -t tobiashvmz/pve-cloud-backup:{{inputs.parameters.build-tag}} .
+          podman push tobiashvmz/pve-cloud-backup:{{inputs.parameters.build-tag}}
+
+    # # terraform-pxc-provider
+    # - name: build-terraform-pxc-provider
+    #   steps:
+    #     - - name: tag-terraform-pxc-provider
+    #     - - name: build-terraform-pxc-provider-pypi
+    #       - name: build-terraform-pxc-provider-goreleaser
+    
+    # .. template steps same logic
+
+    # same logic for building terraform-pxc-backup module
+
+
+    # use workflow level parameters
+
+
+

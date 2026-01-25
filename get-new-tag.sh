@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# either called in pipeline directly via tag push or in downstream
-TRIGGER_TAG=${CI_COMMIT_TAG:-$UPSTREAM_TAG_MESSAGE}
-
 # get the latest tag => default to 0.0.0
 git fetch --tags --quiet
 tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
@@ -18,17 +15,17 @@ major=$(echo "$latest_tag" | cut -d '.' -f 1)
 minor=$(echo "$latest_tag" | cut -d '.' -f 2)
 patch=$(echo "$latest_tag" | cut -d '.' -f 3)
 
-if [[ "$TRIGGER_TAG" == *"-major" ]]; then
+if [[ "$1" == "major" ]]; then
   major=$((major + 1))
   minor=0
   patch=0
-elif [[ "$TRIGGER_TAG" == *"-minor" ]]; then
+elif [[ "$1" == "minor" ]]; then
   minor=$((minor + 1))
   patch=0
-elif [[ "$TRIGGER_TAG" == *"-patch" ]]; then
+elif [[ "$1" == "patch" ]]; then
   patch=$((patch + 1))
 else
-  echo "Unknown increment type: $TRIGGER_TAG"
+  echo "Unknown increment type: $1"
   exit 1
 fi
 
