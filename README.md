@@ -6,16 +6,19 @@ This repository contains images used for building proxmox cloud. For the main wo
 
 You need to configure your argo workflows instance somewhere and generate a kubeconfig for access to it.
 
-Alongside the deployment create a k8s secret with the following fields:
+Alongside the deployment create a k8s secret named `pxc-ci-secrets` with the following fields:
 
 * `id_ed25519` => ssh key used for pulling and pushing to gitlab
 * `pypi_token`
 * `ansible_galaxy_token`
 * `docker_auth_config_b64`
-
+* `gpg_exported_key_b64`
+* `gpg_fingerprint`
+* `gpg_passphrase
+`
 In the gitlab group containing the repositories for proxmox cloud, create a CI/CD variable named `ARGO_KUBECONFIG` with the kubeconfig used for submitting the workflow.
 
-
+### Obtaining secrets
 
 Gitlab runners need to be priviledged to support podman builds via ci.
 
@@ -42,7 +45,7 @@ cat <<EOF | base64 -w 0
 EOF
 ```
 
-* add `*.*.*` as protected tag pattern under Repository settings in gitlab for each repository with a pipeline.
+* add `release-*` and `rc-` as protected tag pattern under Repository settings in gitlab for each repository with a pipeline.
 * allow job ci tokens to make push changes to the repositories, CI/CD settings => Job token permissions => Allow git push
 
 ### Terraform registry
@@ -104,4 +107,10 @@ docker push tobiashvmz/pve-cloud-pyci:$VERSION
 VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.goci . -t tobiashvmz/pve-cloud-goci:$VERSION
 docker push tobiashvmz/pve-cloud-goci:$VERSION
+```
+
+```bash
+VERSION=$(date +"%Y%m%d%H%M")
+docker build -f Dockerfile.pdci . -t tobiashvmz/pve-cloud-pdci:$VERSION
+docker push tobiashvmz/pve-cloud-pdci:$VERSION
 ```

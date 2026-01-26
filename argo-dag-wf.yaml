@@ -4,6 +4,7 @@ metadata:
   generateName: release-pxc-
 spec:
   entrypoint: "" # set by cli
+  parallelism: 3
   volumes:
     # secrets for pushing and pulling to various services
     - name: pxc-ci-secrets
@@ -65,6 +66,8 @@ spec:
               parameters:
               - name: build-tag
                 value: "{{steps.init-terraform-pxc-backup.outputs.parameters.build-tag}}"
+              - name: branch-name
+                value: "{{steps.init-terraform-pxc-backup.outputs.parameters.branch-name}}"
 
     - name: terraform-pxc-controller-entry
       steps:
@@ -81,6 +84,8 @@ spec:
               parameters:
               - name: build-tag
                 value: "{{steps.init-terraform-pxc-controller.outputs.parameters.build-tag}}"
+              - name: branch-name
+                value: "{{steps.init-terraform-pxc-controller.outputs.parameters.branch-name}}"
 
     - name: pve-cloud-controller-entry
       steps:
@@ -218,11 +223,16 @@ spec:
 
           echo $build_tag > /tmp/build-tag
 
+          git branch --show-current > /tmp/branch-name
+
       outputs:
         parameters:
           - name: build-tag
             valueFrom:
               path: /tmp/build-tag
+          - name: branch-name
+            valueFrom:
+              path: /tmp/branch-name
 
     # pytest-pve-cloud
     - name: build-py-pve-cloud
@@ -246,7 +256,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261019
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -302,7 +312,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261019
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -342,7 +352,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261019
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -527,7 +537,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261019
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -552,12 +562,43 @@ spec:
 
           /scripts/build-pypi.sh {{inputs.parameters.build-tag}} py-pve-cloud-backup pve_cloud_backup
 
+          # update downstream repositories
+          git config --global user.name "{{workflow.parameters.git_user}}"
+          git config --global user.email "{{workflow.parameters.git_email}}"
+
+          build_tag='{{inputs.parameters.build-tag}}'
+
+          # update pve_cloud collection
+          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
+
+          if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
+            # determine down stream tag and create / switch to rc branch
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            git checkout $new_tag-rc || git checkout -b $new_tag-rc
+
+            # commit rc version on rc branch
+            sed -i "s/py_pve_cloud_backup_version:\s.*$/py_pve_cloud_backup_version: \"${build_tag}\"/" playbooks/setup_backup_daemon.yaml
+            git add playbooks/setup_backup_daemon.yaml
+
+            git commit -m "Set pve-cloud-backup rc version to $build_tag"
+            git push origin $new_tag-rc
+
+          elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
+            # for prod releases we simply commit the new version into the master branch
+
+            sed -i "s/py_pve_cloud_backup_version:\s.*$/py_pve_cloud_backup_version: \"${build_tag}\"/" playbooks/setup_backup_daemon.yaml
+            git add playbooks/setup_backup_daemon.yaml
+
+            git commit -m "Update pve-cloud-backup version to build_tag"
+            git push origin master
+          fi
+
     - name: build-pve-cloud-backup-image
       inputs:
         parameters:
         - name: build-tag
       script:
-        image: quay.io/podman/stable:v5.7.1
+        image: tobiashvmz/pve-cloud-pdci:202601261951
         command: [bash]
         securityContext:
           privileged: true
@@ -592,7 +633,6 @@ spec:
           git config --global user.name "{{workflow.parameters.git_user}}"
           git config --global user.email "{{workflow.parameters.git_email}}"
 
-          # clone the tag for building
           build_tag='{{inputs.parameters.build-tag}}'
 
           # update tf backup module
@@ -620,38 +660,13 @@ spec:
             git push origin master
           fi
 
-          # update pve_cloud collection
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
-
-          if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
-            # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
-            git checkout $new_tag-rc || git checkout -b $new_tag-rc
-
-            # commit rc version on rc branch
-            sed -i "s/py_pve_cloud_backup_version:\s.*$/py_pve_cloud_backup_version: \"${build_tag}\"/" playbooks/setup_backup_daemon.yaml
-            git add playbooks/setup_backup_daemon.yaml
-
-            git commit -m "Set pve-cloud-backup rc version to $build_tag" "${new_tag}-rc"
-            git push origin $new_tag-rc
-
-          elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
-
-            sed -i "s/py_pve_cloud_backup_version:\s.*$/py_pve_cloud_backup_version: \"${build_tag}\"/" playbooks/setup_backup_daemon.yaml
-            git add playbooks/setup_backup_daemon.yaml
-
-            git commit -m "Update pve-cloud-backup version to build_tag"
-            git push origin master
-          fi
-
     # pve_cloud ansible collection steps
     - name: init-build-pve-cloud-collection
       inputs:
         parameters:
         - name: repo-name
       script:
-        image: tobiashvmz/pve-cloud-ci:202601261018
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -681,7 +696,7 @@ spec:
 
           echo "new tag based on build_increment: $new_tag"
           
-          if [[ "{{workflow.parameters.build_type}})" == "rc" ]]; then
+          if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # create / switch to rc branch
             git checkout "$new_tag-rc" || git checkout -b "$new_tag-rc"
 
@@ -706,7 +721,7 @@ spec:
             # return build tag as artifact
             build_tag=$new_rc_tag
 
-          elif [[ "{{workflow.parameters.build_type}})" == "release" ]]; then
+          elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
             # on release we want to cleanup rc branches
             if git ls-remote --heads origin | grep -q "refs/heads/${new_tag}-rc"; then
               echo "deleting rc release branch ${new_tag}-rc"
@@ -723,6 +738,7 @@ spec:
             sed -i "s/version:.*sed/version: $new_tag # sed/" cloud-ee.yaml
             git add cloud-ee.yaml
 
+            # todo: there is probably a cleaner step to do this at
             # update documentation
             ./mkdocs-gen.sh
             git add docs/schemas/
@@ -761,7 +777,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: alpine/ansible:2.20.0
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         env:
           - name: ANSIBLE_GALAXY_TOKEN
@@ -847,7 +863,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: quay.io/podman/stable:v5.7.1
+        image: tobiashvmz/pve-cloud-pdci:202601261951
         command: [bash]
         securityContext:
           privileged: true
@@ -932,13 +948,15 @@ spec:
               parameters:
               - name: build-tag
                 value: "{{steps.init-terraform-provider-pxc.outputs.parameters.build-tag}}"
+              - name: branch-name
+                value: "{{steps.init-terraform-provider-pxc.outputs.parameters.branch-name}}"
 
     - name: build-terraform-provider-pxc-pypi
       inputs:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261019
+        image: tobiashvmz/pve-cloud-pyci:202601261949
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -967,8 +985,9 @@ spec:
       inputs:
         parameters:
         - name: build-tag
+        - name: branch-name
       script:
-        image: tobiashvmz/pve-cloud-goci:202601261101
+        image: tobiashvmz/pve-cloud-goci:202601261950
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -1003,13 +1022,18 @@ spec:
           # trust host for ssh pulls
           ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
 
-          # clone the latest release tag
+          # set git user / mail
+          git config --global user.name "{{workflow.parameters.git_user}}"
+          git config --global user.email "{{workflow.parameters.git_email}}"
+
+          # clone the latest release branch
           build_tag={{inputs.parameters.build-tag}} 
-          git clone --branch $build_tag --depth 1 {{workflow.parameters.git_pull_prefix}}/terraform-provider-pxc.git && cd terraform-provider-pxc
+          git clone --branch {{inputs.parameters.branch-name}} {{workflow.parameters.git_pull_prefix}}/terraform-provider-pxc.git && cd terraform-provider-pxc
 
           # push it to github
           git remote add github https://$GITHUB_TOKEN@github.com/Proxmox-Cloud/terraform-provider-pxc.git
-          git push github $build_tag
+          git push github {{inputs.parameters.branch-name}}
+          git push github {{inputs.parameters.build-tag}} 
 
           # import gpg for publishing
           echo "$GPG_EXPORTED_KEY_B64" | base64 -d > gpg-key.asc
@@ -1017,7 +1041,7 @@ spec:
           rm gpg-key.asc # remove the key, goreleaser needs clean state
 
           # rest is sourced via env vars set by ci
-          goreleaser release
+          GORELEASER_CURRENT_TAG={{inputs.parameters.build-tag}} goreleaser release
 
           # now we update our downstream repositories
 
@@ -1076,6 +1100,7 @@ spec:
       inputs:
         parameters:
         - name: build-tag
+        - name: branch-name
       script:
         image: tobiashvmz/pve-cloud-ci:202601261018
         command: [bash]
@@ -1097,13 +1122,13 @@ spec:
           # trust host for ssh pulls
           ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
 
-          # clone the latest release tag
-          build_tag={{inputs.parameters.build-tag}} 
-          git clone --branch $build_tag --depth 1 {{workflow.parameters.git_pull_prefix}}/terraform-pxc-backup.git && cd terraform-pxc-backup
+          # clone the latest release branch
+          git clone --branch {{inputs.parameters.branch-name}} {{workflow.parameters.git_pull_prefix}}/terraform-pxc-backup.git && cd terraform-pxc-backup
 
           # push it to github
           git remote add github https://$GITHUB_TOKEN@github.com/Proxmox-Cloud/terraform-pxc-backup.git
-          git push github $build_tag
+          git push github {{inputs.parameters.branch-name}}
+          git push github {{inputs.parameters.build-tag}} 
 
 
     # terraform-pxc-controller module
@@ -1111,6 +1136,7 @@ spec:
       inputs:
         parameters:
         - name: build-tag
+        - name: branch-name
       script:
         image: tobiashvmz/pve-cloud-ci:202601261018
         command: [bash]
@@ -1133,12 +1159,12 @@ spec:
           ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
 
           # clone the latest release tag
-          build_tag={{inputs.parameters.build-tag}} 
-          git clone --branch $build_tag --depth 1 {{workflow.parameters.git_pull_prefix}}/terraform-pxc-controller.git && cd terraform-pxc-controller
+          git clone --branch {{inputs.parameters.branch-name}} {{workflow.parameters.git_pull_prefix}}/terraform-pxc-controller.git && cd terraform-pxc-controller
 
           # push it to github
           git remote add github https://$GITHUB_TOKEN@github.com/Proxmox-Cloud/terraform-pxc-controller.git
-          git push github $build_tag
+          git push github {{inputs.parameters.branch-name}}
+          git push github {{inputs.parameters.build-tag}} 
 
           
 
