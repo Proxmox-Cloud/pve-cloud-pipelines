@@ -4,6 +4,20 @@ RUN apt update
 
 RUN apt install git curl -y
 
+RUN curl -sLO "https://github.com/argoproj/argo-workflows/releases/download/v3.7.8/argo-linux-amd64.gz"
+
+RUN gunzip "argo-linux-amd64.gz"
+
+RUN chmod +x "argo-linux-amd64"
+
+RUN mv "./argo-linux-amd64" /usr/local/bin/argo
+
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
 WORKDIR /scripts
+
+COPY argo-dag-wf.yaml ./
 
 COPY *.sh ./

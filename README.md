@@ -1,8 +1,21 @@
 # Gitlab CI Pipelines - pve-cloud-pipelines
 
-This repository contains pipeline definitions used in our private gitlab that is used for building all artifacts of this project.
+This repository contains images used for building proxmox cloud. For the main work we rely on argo workflows which is invoked by gitlab ci.
 
 ## Setup CI
+
+You need to configure your argo workflows instance somewhere and generate a kubeconfig for access to it.
+
+Alongside the deployment create a k8s secret with the following fields:
+
+* `id_ed25519` => ssh key used for pulling and pushing to gitlab
+* `pypi_token`
+* `ansible_galaxy_token`
+* `docker_auth_config_b64`
+
+In the gitlab group containing the repositories for proxmox cloud, create a CI/CD variable named `ARGO_KUBECONFIG` with the kubeconfig used for submitting the workflow.
+
+
 
 Gitlab runners need to be priviledged to support podman builds via ci.
 
