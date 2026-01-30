@@ -1,7 +1,7 @@
 # requirements file for python base ci image
 
 # ansible core
-ansible==9.13.0
+ansible==13.3.0
 
 # package publishing
 build==1.4.0
