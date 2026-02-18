@@ -3,6 +3,7 @@ set -e
 
 build_increment=$1
 build_type=$2
+source_branch=$3
 
 new_tag=$(/scripts/get-new-tag.sh $build_increment)
 
@@ -13,7 +14,7 @@ if [[ "$build_type" == "rc" ]]; then
   git checkout "$new_tag-rc" >&2 || git checkout -b "$new_tag-rc" >&2
 
   # merge in latest master state and push it
-  git merge master >&2 && git push origin $new_tag-rc >&2
+  git merge $source_branch >&2 && git push origin $new_tag-rc >&2
 
   # get latest rc release tag on the branch
   new_rc_tag=$(/scripts/get-new-rc-tag.sh $new_tag)

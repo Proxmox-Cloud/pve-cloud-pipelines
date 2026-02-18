@@ -26,6 +26,9 @@ spec:
         value: "" # major / minor / patch
       - name: build_type
         value: "" # rc / release
+      - name: source_branch
+        value: "" # the source version branch. master is the latest development version
+        # while there are maintanance branches for earlier version
   serviceAccountName: argo-workflow 
   templates:
     # entry points
@@ -217,9 +220,9 @@ spec:
           # trust host for ssh pulls
           ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
 
-          git clone {{workflow.parameters.git_pull_prefix}}/{{inputs.parameters.repo-name}}.git && cd {{inputs.parameters.repo-name}}
+          git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/{{inputs.parameters.repo-name}}.git && cd {{inputs.parameters.repo-name}}
 
-          build_tag=$(/scripts/init-build.sh {{workflow.parameters.build_increment}} {{workflow.parameters.build_type}})
+          build_tag=$(/scripts/init-build.sh {{workflow.parameters.build_increment}} {{workflow.parameters.build_type}} {{workflow.parameters.source_branch}})
 
           echo $build_tag > /tmp/build-tag
 
@@ -256,7 +259,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -293,9 +296,9 @@ spec:
           # although it seems hard / unclean to do in bash, maybe this should be replaced with python
 
           # update pve_cloud collection
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
 
-          # for prod releases we simply commit the new version into the master branch
+          # for prod releases we simply commit the new version into the source branch
 
           # use pessimistic constraint for e2e tests and some flexibility on prod
           sed -i "s/^pve-cloud-schemas==.*$/pve-cloud-schemas==${build_tag}/" meta/ee-requirements.txt
@@ -303,7 +306,7 @@ spec:
           git add meta/ee-requirements.txt mkdocs-gen.sh
 
           git commit -m "Update pve-cloud-schemas version to $build_tag"
-          git push origin master
+          git push origin {{workflow.parameters.source_branch}}
 
 
     # pytest-pve-cloud pypi packe
@@ -312,7 +315,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -352,7 +355,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -387,7 +390,7 @@ spec:
           # although it seems hard / unclean to do in bash, maybe this should be replaced with python
 
           # update pve-cloud-backup
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve-cloud-backup.git && cd pve-cloud-backup
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pve-cloud-backup.git && cd pve-cloud-backup
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -402,7 +405,7 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             # use pessimistic constraint for e2e tests and some flexibility on prod
             PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
@@ -410,11 +413,11 @@ spec:
             git add requirements.txt
 
             git commit -m "Update py-pve-cloud version to $build_tag (pessimistic)"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
           # update pve-cloud-controller
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve-cloud-controller.git && cd pve-cloud-controller
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pve-cloud-controller.git && cd pve-cloud-controller
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -429,7 +432,7 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             # use pessimistic constraint for e2e tests and some flexibility on prod
             PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
@@ -437,11 +440,11 @@ spec:
             git add requirements.txt
 
             git commit -m "Update py-pve-cloud version to $build_tag (pessimistic)"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
           
           # update pve_cloud collection
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -456,7 +459,7 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             # use pessimistic constraint for e2e tests and some flexibility on prod
             PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
@@ -464,11 +467,11 @@ spec:
             git add meta/ee-requirements.txt
 
             git commit -m "Update py-pve-cloud version to $build_tag (pessimistic)"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
           # update terraform-provider-pxc
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/terraform-provider-pxc.git && cd terraform-provider-pxc
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/terraform-provider-pxc.git && cd terraform-provider-pxc
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -483,7 +486,7 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             # use pessimistic constraint for e2e tests and some flexibility on prod
             PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
@@ -491,15 +494,15 @@ spec:
             git add requirements.txt
 
             git commit -m "Update py-pve-cloud version to $build_tag (pessimistic)"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
           # update pytest-pve-cloud
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pytest-pve-cloud.git && cd pytest-pve-cloud
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pytest-pve-cloud.git && cd pytest-pve-cloud
 
           # no rc releases propagation for pytest repo
           if [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             # use pessimistic constraint for e2e tests and some flexibility on prod
             PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
@@ -507,7 +510,7 @@ spec:
             git add requirements.txt
 
             git commit -m "Update py-pve-cloud version to $build_tag (pessimistic)"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
     # pve-cloud-backup
@@ -537,7 +540,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -569,7 +572,7 @@ spec:
           build_tag='{{inputs.parameters.build-tag}}'
 
           # update pve_cloud collection
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pve_cloud.git && cd pve_cloud
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -584,13 +587,13 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             sed -i "s/py_pve_cloud_backup_version:\s.*$/py_pve_cloud_backup_version: \"${build_tag}\"/" playbooks/setup_backup_daemon.yaml
             git add playbooks/setup_backup_daemon.yaml
 
             git commit -m "Update pve-cloud-backup version to build_tag"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
     - name: build-pve-cloud-backup-image
@@ -598,7 +601,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pdci:202601261951
+        image: tobiashvmz/pve-cloud-pdci:202602152243
         command: [bash]
         securityContext:
           privileged: true
@@ -636,7 +639,7 @@ spec:
           build_tag='{{inputs.parameters.build-tag}}'
 
           # update tf backup module
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/terraform-pxc-backup.git && cd terraform-pxc-backup
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/terraform-pxc-backup.git && cd terraform-pxc-backup
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -651,13 +654,13 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             sed -i "s/var\.backup_image_version\s==\s\?\snull\s?\s\".*\"/var.backup_image_version == null ? \"${build_tag}\"/" variables.tf
             git add variables.tf
 
             git commit -m "Update pve-cloud-backup version to $build_tag"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
     # pve_cloud ansible collection steps
@@ -666,7 +669,7 @@ spec:
         parameters:
         - name: repo-name
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -690,7 +693,7 @@ spec:
           # trust host for ssh pulls
           ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
 
-          git clone {{workflow.parameters.git_pull_prefix}}/{{inputs.parameters.repo-name}}.git && cd {{inputs.parameters.repo-name}}
+          git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/{{inputs.parameters.repo-name}}.git && cd {{inputs.parameters.repo-name}}
 
           new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
 
@@ -700,8 +703,8 @@ spec:
             # create / switch to rc branch
             git checkout "$new_tag-rc" || git checkout -b "$new_tag-rc"
 
-            # merge in latest master state and push it
-            git merge master && git push origin $new_tag-rc
+            # merge in latest source state and push it
+            git merge {{workflow.parameters.source_branch}} && git push origin $new_tag-rc
 
             # get latest rc release tag on the branch
             new_rc_tag=$(/scripts/get-new-rc-tag.sh $new_tag)
@@ -745,7 +748,7 @@ spec:
 
             # commit the update
             git commit -m "Update collection version to $new_tag / update docs."
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
 
             # create the tag and push it
             git tag "$new_tag"
@@ -777,7 +780,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         env:
           - name: ANSIBLE_GALAXY_TOKEN
@@ -863,7 +866,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pdci:202601261951
+        image: tobiashvmz/pve-cloud-pdci:202602152243
         command: [bash]
         securityContext:
           privileged: true
@@ -902,7 +905,7 @@ spec:
           build_tag='{{inputs.parameters.build-tag}}'
 
           # update tf controller module
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/terraform-pxc-controller.git && cd terraform-pxc-controller
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/terraform-pxc-controller.git && cd terraform-pxc-controller
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -917,13 +920,13 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             sed -i "s/var\.cloud_controller_version\s==\s\?\snull\s?\s\".*\"/var.cloud_controller_version == null ? \"${build_tag}\"/" variables.tf
             git add variables.tf
 
             git commit -m "Update pve-cloud-controller version to ${build_tag}"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
 
@@ -956,7 +959,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202601261949
+        image: tobiashvmz/pve-cloud-pyci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -987,7 +990,7 @@ spec:
         - name: build-tag
         - name: branch-name
       script:
-        image: tobiashvmz/pve-cloud-goci:202601261950
+        image: tobiashvmz/pve-cloud-goci:202602152242
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -1046,7 +1049,7 @@ spec:
           # now we update our downstream repositories
 
           # update tf controller downstream_tf_controller_module
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/terraform-pxc-controller.git && cd terraform-pxc-controller
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/terraform-pxc-controller.git && cd terraform-pxc-controller
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -1061,17 +1064,17 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             find . -type f -name "versions.tf" -exec sed -i "s/version.*pxc/version = \"~>${build_tag}\" # pxc/" {} +
             git add .
 
             git commit -m "Update pxc provider version to $build_tag"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
           # update pxc backup module
-          cd .. && git clone {{workflow.parameters.git_pull_prefix}}/terraform-pxc-backup.git && cd terraform-pxc-backup
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/terraform-pxc-backup.git && cd terraform-pxc-backup
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
@@ -1086,13 +1089,13 @@ spec:
             git push origin $new_tag-rc
 
           elif [[ "{{workflow.parameters.build_type}}" == "release" ]]; then
-            # for prod releases we simply commit the new version into the master branch
+            # for prod releases we simply commit the new version into the source branch
 
             find . -type f -name "versions.tf" -exec sed -i "s/version.*pxc/version = \"~>${build_tag}\" # pxc/" {} +
             git add .
 
             git commit -m "Update pxc provider version to $build_tag"
-            git push origin master
+            git push origin {{workflow.parameters.source_branch}}
           fi
 
     # terraform-pxc-backup module
