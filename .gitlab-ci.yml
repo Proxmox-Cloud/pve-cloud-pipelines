@@ -42,5 +42,6 @@ trigger_argo_wf:
         --entrypoint $[[ inputs.entrypoint ]] /scripts/argo-dag-wf.yaml
 
   rules:
-    - when: manual
-
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
+    - when: never

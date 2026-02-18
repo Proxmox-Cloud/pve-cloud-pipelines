@@ -69,21 +69,7 @@ gpg --armor --export-secret-keys KEYID # | base64 -w 0 export the private key fo
 
 ## Releasing
 
-After having build and tested everything locally (using tdd e2e tests), commit all your changes. Using the following tags you can trigger different kinds of releases.
-
-Use `git pull && git tag -f $TAG && git push -f origin $TAG` to trigger a release. Dependant projects are automatically build.
-
-* `rc-patch` / `rc-minor` / `rc-major`
-
-This will take the latest full release and increment it based on the tag name, it will create new branches with `rcN` dependencies starting from `rc0`.
-
-Meaning if the last release was `1.0.0` and you choose `rc-patch` it will create `1.0.1-rc0`.
-
-Each time you tag again it will increment and release `rc1`, `rc2` and so forth.
-
-* `release-patch` / `release-minor` / `release-major` 
-
-This triggers a final production release. It will cleanup any rc branches that fit the same version. 
+All builds, rcs and full releases are triggered via this projects gitlab ci. You have to manually invoke the pipeline via the gitlab ui and specify your parameters.
 
 ! An rc-patch needs to be followed by and release-patch. There are no guardrails!
 
