@@ -1,22 +1,32 @@
-variables:
-  # This creates the dropdown menu
-  DEPLOY_ENV:
-    value: "staging"               # The default selection
-    options:                             # The list of dropdown choices
-      - "development"
-      - "staging"
-      - "production"
-    description: "Select the target environment for this manual run."
-
-  # You can also include free-text inputs alongside dropdowns
-  RELEASE_TAG:
-    value: "v1.0.0"
-    description: "Specify the tag to deploy (Optional)."
+spec:
+  inputs:
+    environment:
+      default: "staging"
+      options:
+        - "development"
+        - "staging"
+        - "production"
+    deploy_speed:
+      default: "fast"
+      options:
+        - "fast"
+        - "thorough"
+    run_security_scan:
+      type: boolean
+      default: false
+---
 
 stages:
+  - build
   - deploy
 
-execute_deploy:
+deploy_job:
   stage: deploy
   script:
-    - echo "Deploying to $DEPLOY_ENV using tag $RELEASE_TAG"
+    - echo "Deploying to $[[ inputs.environment ]]"
+    - echo "Scan setting is $[[ inputs.run_security_scan ]]"
+  rules:
+    # Example: only run if 'thorough' is selected
+    - if: '"$[[ inputs.deploy_speed ]]" == "thorough"'
+      when: manual
+    - when: on_success
