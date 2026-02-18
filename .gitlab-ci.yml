@@ -1,32 +1,46 @@
 spec:
   inputs:
-    environment:
-      default: "staging"
+    entrypoint:
+      default: "py-pve-cloud-entry"
       options:
-        - "development"
-        - "staging"
-        - "production"
-    deploy_speed:
-      default: "fast"
+        - "py-pve-cloud-entry"
+        - "pve-cloud-schemas-entry"
+        - "pytest-pve-cloud-entry"
+        - "pve-cloud-backup-entry"
+        - "terraform-provider-pxc-entry"
+        - "pve-cloud-controller-entry"
+        - "terraform-pxc-controller-entry"
+        - "terraform-pxc-backup-entry"
+        - "pve-cloud-collection-entry"
+    build_increment:
+      default: "patch"
       options:
-        - "fast"
-        - "thorough"
-    run_security_scan:
-      type: boolean
-      default: false
+        - "patch"
+        - "minor"
+        - "major"
+    build_type:
+      default: "rc"
+      options:
+        - "rc"
+        - "release"
+    source_branch:
+      default: "master"
 ---
 
-stages:
-  - build
-  - deploy
+trigger_argo_wf:
+  stage: build
+  image: tobiashvmz/pve-cloud-ci:202602152241
 
-deploy_job:
-  stage: deploy
   script:
-    - echo "Deploying to $[[ inputs.environment ]]"
-    - echo "Scan setting is $[[ inputs.run_security_scan ]]"
+    - export KUBECONFIG=$ARGO_KUBECONFIG
+
+    - |
+      argo submit -n argo -p "source_branch=$[[ inputs.source_branch ]]" \
+        -p "git_host=$CI_SERVER_HOST" -p "git_pull_prefix=git@$CI_SERVER_HOST:$CI_PROJECT_NAMESPACE" \
+        -p "git_user=$GITLAB_USER_NAME" -p "git_email=$GITLAB_USER_EMAIL" \
+        -p "build_increment=$[[ inputs.build_increment ]]" -p "build_type=$[[ inputs.build_type ]]" \
+        --entrypoint $[[ inputs.entrypoint ]] /scripts/argo-dag-wf.yaml
+
   rules:
-    # Example: only run if 'thorough' is selected
-    - if: '"$[[ inputs.deploy_speed ]]" == "thorough"'
-      when: manual
-    - when: on_success
+    - when: manual
+
