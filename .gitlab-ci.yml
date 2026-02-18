@@ -1,0 +1,22 @@
+variables:
+  # This creates the dropdown menu
+  DEPLOY_ENV:
+    value: "staging"               # The default selection
+    options:                             # The list of dropdown choices
+      - "development"
+      - "staging"
+      - "production"
+    description: "Select the target environment for this manual run."
+
+  # You can also include free-text inputs alongside dropdowns
+  RELEASE_TAG:
+    value: "v1.0.0"
+    description: "Specify the tag to deploy (Optional)."
+
+stages:
+  - deploy
+
+execute_deploy:
+  stage: deploy
+  script:
+    - echo "Deploying to $DEPLOY_ENV using tag $RELEASE_TAG"
