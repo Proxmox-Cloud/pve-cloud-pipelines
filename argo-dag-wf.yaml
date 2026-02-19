@@ -597,6 +597,10 @@ spec:
           fi
 
     - name: build-pve-cloud-backup-image
+      # sometimes pypi caches are inconsistent
+      retryStrategy:
+        limit: "1"
+        retryPolicy: "OnFailure"
       inputs:
         parameters:
         - name: build-tag
