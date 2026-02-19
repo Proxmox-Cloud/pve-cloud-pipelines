@@ -868,6 +868,10 @@ spec:
       script:
         image: tobiashvmz/pve-cloud-pdci:202602152243
         command: [bash]
+        # sometimes pypi caches are inconsistent
+        retryStrategy:
+          limit: "1"
+          retryPolicy: "OnFailure"
         securityContext:
           privileged: true
         env:
