@@ -8,7 +8,7 @@ build==1.4.0
 twine==6.2.0
 
 # docs building
-mkdocs-material==9.7.1
+mkdocs-material==9.7.2
 json-schema-for-humans==1.5.1
 mkdocs-include-dir-to-nav==1.2.0
 mkdocs-puml==2.3.0
