@@ -601,6 +601,8 @@ spec:
       retryStrategy:
         limit: "1"
         retryPolicy: "OnFailure"
+        backoff:
+          duration: "1m"
       inputs:
         parameters:
         - name: build-tag
@@ -870,6 +872,8 @@ spec:
       retryStrategy:
         limit: "1"
         retryPolicy: "OnFailure"
+        backoff:
+          duration: "1m"
       inputs:
         parameters:
         - name: build-tag
