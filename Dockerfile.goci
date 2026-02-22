@@ -1,4 +1,4 @@
-FROM goreleaser/goreleaser:v2.13.3
+FROM goreleaser/goreleaser:v2.14.0
 
 RUN apk add gpg-agent
 
