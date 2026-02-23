@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# get existing rc tags
-rc_tags=$(git tag -l | grep -E "^$1-rc[0-9]+$" || true)
+# get existing rc tags on current branch
+rc_tags=$(git tag -l --merged | grep -E "^$1-rc[0-9]+$" || true)
 
 if [ -z "$rc_tags" ]; then
   rc_vers_tag="$1-rc0"

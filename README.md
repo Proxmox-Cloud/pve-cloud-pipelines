@@ -75,6 +75,14 @@ All builds, rcs and full releases are triggered via this projects gitlab ci. You
 
 The project [pve-cloud-schemas](https://github.com/Proxmox-Cloud/pve-cloud-schemas) does not have rc pipelines and also doesnt trigger any downstream builds.
 
+### Stable versions
+
+Stable versions are fixxed to the pxc cloud major version. The branch is always named for all artifacts pxc-VERS_X-stable. When creating a stable version the master HAS TO MOVE ON TO A NEW MAJOR VERSION, otherwise the build system will not work.
+
+It works by incrementing patch / minor versions related to the current branch and thus can be developed / fixxed independently.
+
+The build system itself has to maintain backwards compatibility as all versions share the same pipeline.
+
 ## Publish ci images
 
 ```bash

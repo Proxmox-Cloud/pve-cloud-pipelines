@@ -3,7 +3,8 @@ set -e
 
 # get the latest tag => default to 0.0.0
 git fetch --tags --quiet
-tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
+# --merged only fetch tags on the current branch, this is needed for stable branch builds
+tags=$(git tag -l --merged | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
 if [ -z "$tags" ]; then
   latest_tag="0.0.0"
 else

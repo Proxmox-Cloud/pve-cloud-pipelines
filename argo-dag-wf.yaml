@@ -259,7 +259,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -315,7 +315,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -355,7 +355,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -540,7 +540,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -607,7 +607,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pdci:202602152243
+        image: docker.io/tobiashvmz/pve-cloud-pdci:202602231507
         command: [bash]
         securityContext:
           privileged: true
@@ -675,7 +675,7 @@ spec:
         parameters:
         - name: repo-name
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -786,7 +786,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         env:
           - name: ANSIBLE_GALAXY_TOKEN
@@ -878,7 +878,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pdci:202602152243
+        image: docker.io/tobiashvmz/pve-cloud-pdci:202602231507
         command: [bash]
         securityContext:
           privileged: true
@@ -971,7 +971,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602152242
+        image: tobiashvmz/pve-cloud-pyci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -1002,7 +1002,7 @@ spec:
         - name: build-tag
         - name: branch-name
       script:
-        image: tobiashvmz/pve-cloud-goci:202602152242
+        image: tobiashvmz/pve-cloud-goci:202602231506
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
