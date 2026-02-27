@@ -14,8 +14,8 @@ Alongside the deployment create a k8s secret named `pxc-ci-secrets` with the fol
 * `docker_auth_config_b64`
 * `gpg_exported_key_b64`
 * `gpg_fingerprint`
-* `gpg_passphrase
-`
+* `gpg_passphrase`
+
 In the gitlab group containing the repositories for proxmox cloud, create a CI/CD variable named `ARGO_KUBECONFIG` with the kubeconfig used for submitting the workflow.
 
 ### Obtaining secrets
@@ -77,9 +77,9 @@ The project [pve-cloud-schemas](https://github.com/Proxmox-Cloud/pve-cloud-schem
 
 ### Stable versions
 
-Stable versions are fixxed to the pxc cloud major version. The branch is always named for all artifacts pxc-VERS_X-stable. When creating a stable version the master HAS TO MOVE ON TO A NEW MAJOR VERSION, otherwise the build system will not work.
+Stable versions are fixxed to the pxc cloud major version. The branch is always named for all artifacts pxc-MAJOR_VERS_X-stable. When creating a stable version the master HAS TO MOVE ON TO A NEW MAJOR VERSION, otherwise the build system will not work.
 
-It works by incrementing patch / minor versions related to the current branch and thus can be developed / fixxed independently.
+It works by incrementing patch / minor versions related to the current branch and thus can be developed / fixxed independently. All dependencies are within the same major versions.
 
 The build system itself has to maintain backwards compatibility as all versions share the same pipeline.
 

@@ -25,6 +25,9 @@ spec:
         - "release"
     source_branch:
       default: "master"
+      options:
+        - "pxc-3-stable"
+        - "master"
 ---
 
 trigger_argo_wf:
