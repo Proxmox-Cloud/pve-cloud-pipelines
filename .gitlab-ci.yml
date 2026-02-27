@@ -32,7 +32,7 @@ spec:
 
 trigger_argo_wf:
   stage: build
-  image: tobiashvmz/pve-cloud-ci:202602271012
+  image: tobiashvmz/pve-cloud-argoci:202602271104
 
   script:
     - export KUBECONFIG=$ARGO_KUBECONFIG

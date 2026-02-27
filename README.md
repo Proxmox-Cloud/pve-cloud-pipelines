@@ -85,6 +85,10 @@ The build system itself has to maintain backwards compatibility as all versions 
 
 ## Publish ci images
 
+ci images are two staged
+
+first we build the core images with build scripts:
+
 ```bash
 VERSION=$(date +"%Y%m%d%H%M")
 
@@ -103,4 +107,13 @@ docker push tobiashvmz/pve-cloud-goci:$VERSION
 docker build -f Dockerfile.pdci . -t tobiashvmz/pve-cloud-pdci:$VERSION
 docker push tobiashvmz/pve-cloud-pdci:$VERSION
 # replace with (tobiashvmz/pve-cloud-pdci)(:\d+) $1:NEW_VER
+```
+
+then we build the final image that references all the others for the build argo workflow
+
+```bash
+docker build -f Dockerfile.argoci . -t tobiashvmz/pve-cloud-argoci:$VERSION
+docker push tobiashvmz/pve-cloud-argoci:$VERSION
+
+# update .gitlab-ci.yml to reference this image
 ```

@@ -4,8 +4,10 @@ set -e
 # fetch all tags
 git fetch --tags --quiet
 
+source_branch=$2
+
 # based on the branch we are on we want to limit the tags for determining the new tag
-if [[ "$2" == "master "]]; then
+if [[ "$source_branch" == "master" ]]; then
   # on master we simply take all tags, get the newest and increment from there
   tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
   if [ -z "$tags" ]; then
@@ -14,9 +16,9 @@ if [[ "$2" == "master "]]; then
     latest_tag=$(echo "$tags" | sort -V | tail -n 1)
   fi
 
-elif [[ "$2" == pxc-* ]]; this
+elif [[ "$source_branch" == pxc-* ]]; then
   # on lts branches we limit the filter by the lts version
-  lts_major=$(echo "pxc-3-stable" | cut -d'-' -f2)
+  lts_major=$(echo "$source_branch" | cut -d'-' -f2)
   tags=$(git tag -l | grep -E "^$lts_major\.[0-9]+\.[0-9]+$" || true)
   if [ -z "$tags" ]; then
     latest_tag="$lts_major.0.0"
@@ -25,8 +27,8 @@ elif [[ "$2" == pxc-* ]]; this
   fi
 
 else
-  echo "Unknown supported branch type: $2"
-  exit 1
+  echo "Unknown supported branch type: $source_branch"
+  # exit 1
 fi
 
 # split the tag and increment
