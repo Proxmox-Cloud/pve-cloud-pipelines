@@ -87,24 +87,20 @@ The build system itself has to maintain backwards compatibility as all versions 
 
 ```bash
 VERSION=$(date +"%Y%m%d%H%M")
+
 docker build -f Dockerfile.ci . -t tobiashvmz/pve-cloud-ci:$VERSION
 docker push tobiashvmz/pve-cloud-ci:$VERSION
-```
+# replace with (tobiashvmz/pve-cloud-ci)(:\d+) $1:NEW_VER
 
-```bash
-VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.pyci . -t tobiashvmz/pve-cloud-pyci:$VERSION
 docker push tobiashvmz/pve-cloud-pyci:$VERSION
-```
+# replace with (tobiashvmz/pve-cloud-pyci)(:\d+) $1:NEW_VER
 
-```bash
-VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.goci . -t tobiashvmz/pve-cloud-goci:$VERSION
 docker push tobiashvmz/pve-cloud-goci:$VERSION
-```
+# replace with (tobiashvmz/pve-cloud-goci)(:\d+) $1:NEW_VER
 
-```bash
-VERSION=$(date +"%Y%m%d%H%M")
 docker build -f Dockerfile.pdci . -t tobiashvmz/pve-cloud-pdci:$VERSION
 docker push tobiashvmz/pve-cloud-pdci:$VERSION
+# replace with (tobiashvmz/pve-cloud-pdci)(:\d+) $1:NEW_VER
 ```
