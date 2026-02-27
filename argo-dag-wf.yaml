@@ -259,7 +259,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -315,7 +315,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -355,7 +355,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -540,7 +540,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -675,7 +675,7 @@ spec:
         parameters:
         - name: repo-name
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -760,9 +760,12 @@ spec:
             git tag "$new_tag"
             git push origin "$new_tag"
 
-            # push the docs
-            git fetch origin gh-pages:gh-pages
-            mkdocs gh-deploy
+            # only deploy docs for master version
+            # todo: support multi branch mkdocs
+            if [ "{{workflow.parameters.source_branch}}" = "master" ]; then
+                git fetch origin gh-pages:gh-pages
+                mkdocs gh-deploy
+            fi
 
             # return build tag as artifact
             build_tag=$new_tag
@@ -786,7 +789,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         env:
           - name: ANSIBLE_GALAXY_TOKEN
@@ -971,7 +974,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602231506
+        image: tobiashvmz/pve-cloud-pyci:202602270903
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
