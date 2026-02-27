@@ -599,10 +599,10 @@ spec:
     - name: build-pve-cloud-backup-image
       # sometimes pypi caches are inconsistent
       retryStrategy:
-        limit: "1"
+        limit: "2"
         retryPolicy: "OnFailure"
         backoff:
-          duration: "1m"
+          duration: "2m"
       inputs:
         parameters:
         - name: build-tag
@@ -675,10 +675,10 @@ spec:
         parameters:
         - name: repo-name
       retryStrategy:
-        limit: "1"
+        limit: "2"
         retryPolicy: "OnFailure"
         backoff:
-          duration: "1m"
+          duration: "2m"
       script:
         image: tobiashvmz/pve-cloud-pyci:202602271103
         command: [bash]
@@ -878,10 +878,10 @@ spec:
     - name: build-pve-cloud-controller-image
       # sometimes pypi caches are inconsistent
       retryStrategy:
-        limit: "1"
+        limit: "2"
         retryPolicy: "OnFailure"
         backoff:
-          duration: "1m"
+          duration: "2m"
       inputs:
         parameters:
         - name: build-tag
