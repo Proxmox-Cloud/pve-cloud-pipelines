@@ -202,7 +202,7 @@ spec:
         parameters:
         - name: repo-name
       script:
-        image: tobiashvmz/pve-cloud-ci:202602270926
+        image: tobiashvmz/pve-cloud-ci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -259,7 +259,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -315,7 +315,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -355,7 +355,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -394,7 +394,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -421,7 +421,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -448,7 +448,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -475,7 +475,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -540,7 +540,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -576,7 +576,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -607,7 +607,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: docker.io/tobiashvmz/pve-cloud-pdci:202602270927
+        image: docker.io/tobiashvmz/pve-cloud-pdci:202602271012
         command: [bash]
         securityContext:
           privileged: true
@@ -649,7 +649,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -680,7 +680,7 @@ spec:
         backoff:
           duration: "1m"
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -706,7 +706,7 @@ spec:
 
           git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/{{inputs.parameters.repo-name}}.git && cd {{inputs.parameters.repo-name}}
 
-          new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+          new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
 
           echo "new tag based on build_increment: $new_tag"
           
@@ -794,7 +794,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         env:
           - name: ANSIBLE_GALAXY_TOKEN
@@ -886,7 +886,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: docker.io/tobiashvmz/pve-cloud-pdci:202602270927
+        image: docker.io/tobiashvmz/pve-cloud-pdci:202602271012
         command: [bash]
         securityContext:
           privileged: true
@@ -929,7 +929,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -979,7 +979,7 @@ spec:
         parameters:
         - name: build-tag
       script:
-        image: tobiashvmz/pve-cloud-pyci:202602270927
+        image: tobiashvmz/pve-cloud-pyci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -1010,7 +1010,7 @@ spec:
         - name: build-tag
         - name: branch-name
       script:
-        image: tobiashvmz/pve-cloud-goci:202602270927
+        image: tobiashvmz/pve-cloud-goci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -1073,7 +1073,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -1098,7 +1098,7 @@ spec:
 
           if [[ "{{workflow.parameters.build_type}}" == "rc" ]]; then
             # determine down stream tag and create / switch to rc branch
-            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}})
+            new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
             git checkout $new_tag-rc || git checkout -b $new_tag-rc
 
             # commit rc version on rc branch
@@ -1125,7 +1125,7 @@ spec:
         - name: build-tag
         - name: branch-name
       script:
-        image: tobiashvmz/pve-cloud-ci:202602270926
+        image: tobiashvmz/pve-cloud-ci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key
@@ -1161,7 +1161,7 @@ spec:
         - name: build-tag
         - name: branch-name
       script:
-        image: tobiashvmz/pve-cloud-ci:202602270926
+        image: tobiashvmz/pve-cloud-ci:202602271012
         command: [bash]
         volumeMounts:
           # pulling gitlab currently only works with ed25519 key

@@ -77,7 +77,7 @@ The project [pve-cloud-schemas](https://github.com/Proxmox-Cloud/pve-cloud-schem
 
 ### Stable versions
 
-Stable versions are fixxed to the pxc cloud major version. The branch is always named for all artifacts pxc-MAJOR_VERS_X-stable. When creating a stable version the master HAS TO MOVE ON TO A NEW MAJOR VERSION, otherwise the build system will not work.
+Stable versions are fixxed to the pxc cloud major version. The branch is always named for all artifacts pxc-MAJOR_VERS_X-stable. The version branch needs to be EXACTLY NAMED as the pipelines split the string to get the major version.
 
 It works by incrementing patch / minor versions related to the current branch and thus can be developed / fixxed independently. All dependencies are within the same major versions.
 

@@ -5,7 +5,7 @@ build_increment=$1
 build_type=$2
 source_branch=$3
 
-new_tag=$(/scripts/get-new-tag.sh $build_increment)
+new_tag=$(/scripts/get-new-tag.sh $build_increment $source_branch)
 
 echo "new tag based on build_increment: $new_tag" >&2
  
