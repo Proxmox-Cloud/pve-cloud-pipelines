@@ -592,7 +592,7 @@ spec:
             sed -i "s/py_pve_cloud_backup_version:\s.*$/py_pve_cloud_backup_version: \"${build_tag}\"/" playbooks/setup_backup_daemon.yaml
             git add playbooks/setup_backup_daemon.yaml
 
-            git commit -m "Update pve-cloud-backup version to build_tag"
+            git commit -m "Update pve-cloud-backup version to $build_tag"
             git push origin {{workflow.parameters.source_branch}}
           fi
 

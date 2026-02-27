@@ -81,6 +81,12 @@ Stable versions are fixxed to the pxc cloud major version. The branch is always 
 
 It works by incrementing patch / minor versions related to the current branch and thus can be developed / fixxed independently. All dependencies are within the same major versions.
 
+In order to introduce a new stable branch do the following steps:
+
+* check out the current master branch on all core repositories
+* run git branch -b pxc-X-stable and push the new branch
+* manually create the new base major version tag on all repos running git tag NEW_MAJOR.0.0 and git push origin NEW_MAJOR.0.0
+
 The build system itself has to maintain backwards compatibility as all versions share the same pipeline.
 
 ## Publish ci images
