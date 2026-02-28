@@ -32,6 +32,7 @@ spec:
         - "master"
 ---
 
+# execute argo-dag-wf.yaml workflow
 trigger_argo_wf:
   stage: build
   image: tobiashvmz/pve-cloud-argoci:202602271115
@@ -44,7 +45,7 @@ trigger_argo_wf:
         -p "git_host=$CI_SERVER_HOST" -p "git_pull_prefix=git@$CI_SERVER_HOST:$CI_PROJECT_NAMESPACE" \
         -p "git_user=$GITLAB_USER_NAME" -p "git_email=$GITLAB_USER_EMAIL" \
         -p "build_increment=$[[ inputs.build_increment ]]" -p "build_type=$[[ inputs.build_type ]]" \
-        --entrypoint $[[ inputs.entrypoint ]] /scripts/argo-dag-wf.yaml
+        --entrypoint $[[ inputs.entrypoint ]] argo-dag-wf.yaml
 
   rules:
     - if: $CI_PIPELINE_SOURCE == "web"

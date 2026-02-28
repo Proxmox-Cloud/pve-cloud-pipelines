@@ -124,7 +124,7 @@ docker push tobiashvmz/pve-cloud-pdci:$VERSION
 # replace with (tobiashvmz/pve-cloud-pdci)(:\d+) $1:NEW_VER
 ```
 
-then we build the final image that references all the others for the build argo workflow
+for the image launching the argo command we have a seperate image
 
 ```bash
 docker build -f Dockerfile.argoci . -t tobiashvmz/pve-cloud-argoci:$VERSION
