@@ -89,6 +89,15 @@ In order to introduce a new stable branch do the following steps:
 
 The build system itself has to maintain backwards compatibility as all versions share the same pipeline.
 
+To pull changes / fixes from an stable branch into master you might do the following:
+
+```bash
+git checkout master
+git checkout pxc-X-stable path/to/file
+
+git commit -m "..."
+```
+
 ## Publish ci images
 
 ci images are two staged
