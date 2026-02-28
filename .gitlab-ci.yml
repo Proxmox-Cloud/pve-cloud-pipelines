@@ -4,14 +4,16 @@ spec:
       default: "py-pve-cloud-entry"
       options:
         - "py-pve-cloud-entry"
-        - "pve-cloud-schemas-entry"
-        - "pytest-pve-cloud-entry"
         - "pve-cloud-backup-entry"
         - "terraform-provider-pxc-entry"
         - "pve-cloud-controller-entry"
         - "terraform-pxc-controller-entry"
         - "terraform-pxc-backup-entry"
         - "pve-cloud-collection-entry"
+        # these two entry points will only execute on "release" build type
+        # rc is not available
+        - "pve-cloud-schemas-entry"
+        - "pytest-pve-cloud-entry"
     build_increment:
       default: "patch"
       options:
