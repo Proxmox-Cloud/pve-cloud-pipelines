@@ -132,3 +132,44 @@ docker push tobiashvmz/pve-cloud-argoci:$VERSION
 
 # update .gitlab-ci.yml to reference this image
 ```
+
+
+## Convinience Scripts
+
+
+Copy these on the top level of your pve-cloud folder:
+
+
+* test-all.sh => run e2e tests for the entire collection (run `tddog --recursive`)
+```bash
+#!/bin/bash
+set -e
+
+(cd pytest-pve-cloud && pip install -e .)
+
+(cd ansible_collections/pxc/cloud && pytest -s tests/e2e/ --skip-cleanup)
+(cd terraform-pxc-controller && pytest -s tests/e2e/ --skip-cleanup)
+(cd terraform-pxc-backup && pytest -s tests/e2e/ --skip-cleanup)
+```
+* core-repos.sh => run git commands for core pve cloud repositories (e.g. switching to / creating of stable brances )
+```bash
+#!/bin/bash
+
+# this includes all repositories that contain the core proxmox cloud collection
+# pipelines and forks are not included
+DIRS=(
+  "terraform-pxc-controller" 
+  "terraform-pxc-backup" 
+  "terraform-provider-pxc"
+  "pve-cloud-schemas"
+  "pytest-pve-cloud"
+  "py-pve-cloud"
+  "pve-cloud-controller"
+  "pve-cloud-backup"
+  "ansible_collections/pxc/cloud"
+)
+
+for dir in "${DIRS[@]}"; do
+    (cd "$dir" && eval "$@")
+done
+```
