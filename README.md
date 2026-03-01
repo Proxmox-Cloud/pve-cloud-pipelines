@@ -93,7 +93,12 @@ To pull changes / fixes from an stable branch into master you might do the follo
 
 ```bash
 git checkout master
-git checkout pxc-X-stable path/to/file
+
+# checkout a recent file from the branch
+git checkout pxc-X-stable path/to/file 
+
+# checkout the contents of an entire commit
+git cherry-pick -n HASH # -n pulls the changes into the staging area
 
 git commit -m "..."
 ```
