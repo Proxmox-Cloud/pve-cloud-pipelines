@@ -103,6 +103,8 @@ git cherry-pick -n HASH # -n pulls the changes into the staging area
 git commit -m "..."
 ```
 
+To see bugfixes etc made on the stable branch so you can merge them into the master, run `git diff master..pxc-X-stable`.
+
 ## Publish ci images
 
 ci images are two staged
