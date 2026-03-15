@@ -1,4 +1,4 @@
-FROM quay.io/podman/stable:v5.7.1
+FROM quay.io/podman/stable:v5.8.1
 
 WORKDIR /scripts
 
