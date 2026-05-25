@@ -180,3 +180,9 @@ for dir in "${DIRS[@]}"; do
     (cd "$dir" && eval "$@")
 done
 ```
+* python interpreter vscode config `.vscode/settings.json`
+```json
+{
+    "python.defaultInterpreterPath": "${env:HOME}/.pve-cloud-dev-venv/bin/python"
+}
+```
