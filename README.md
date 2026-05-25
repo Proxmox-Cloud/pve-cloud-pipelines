@@ -152,7 +152,11 @@ Copy these on the top level of your pve-cloud folder:
 #!/bin/bash
 set -e
 
+# echo dummy version for local install
+echo "__version__ = \"0.0.1\"" > pytest-pve-cloud/src/pve_cloud_test/_version.py
 (cd pytest-pve-cloud && pip install -e .)
+
+# then run `tddog --recursive` from the root dir
 
 (cd ansible_collections/pxc/cloud && pytest -s tests/e2e/ --skip-cleanup)
 (cd terraform-pxc-controller && pytest -s tests/e2e/ --skip-cleanup)
