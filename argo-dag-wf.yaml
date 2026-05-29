@@ -936,6 +936,9 @@ spec:
             sed -i "s/var\.cloud_controller_version\s==\s\?\snull\s?\s\".*\"/var.cloud_controller_version == null ? \"${build_tag}\"/" variables.tf
             git add variables.tf
 
+            sed -i "s/var\.cloud_controller_version\s==\s\?\snull\s?\s\".*\"/var.cloud_controller_version == null ? \"${build_tag}\"/" modules/multi-cloud-gw/variables.tf
+            git add modules/multi-cloud-gw/variables.tf
+
             git commit -m "Set pve-cloud-controller rc version to ${build_tag}"
             git push origin $new_tag-rc
 
@@ -944,6 +947,9 @@ spec:
 
             sed -i "s/var\.cloud_controller_version\s==\s\?\snull\s?\s\".*\"/var.cloud_controller_version == null ? \"${build_tag}\"/" variables.tf
             git add variables.tf
+            
+            sed -i "s/var\.cloud_controller_version\s==\s\?\snull\s?\s\".*\"/var.cloud_controller_version == null ? \"${build_tag}\"/" modules/multi-cloud-gw/variables.tf
+            git add modules/multi-cloud-gw/variables.tf
 
             git commit -m "Update pve-cloud-controller version to ${build_tag}"
             git push origin {{workflow.parameters.source_branch}}
