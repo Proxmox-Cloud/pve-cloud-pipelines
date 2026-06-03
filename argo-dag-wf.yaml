@@ -1008,7 +1008,7 @@ spec:
           # checkout repo at build tag
           git clone --branch {{inputs.parameters.build-tag}} --depth 1 {{workflow.parameters.git_pull_prefix}}/terraform-provider-pxc.git && cd terraform-provider-pxc
 
-          /scripts/build-pypi.sh {{inputs.parameters.build-tag}} rpyc-pve-cloud pve_cloud_rpc
+          /scripts/build-pypi.sh {{inputs.parameters.build-tag}} grpc-pve-cloud pve_cloud_rpc
 
     - name: build-terraform-provider-pxc-goreleaser
       inputs:
