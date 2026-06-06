@@ -158,6 +158,7 @@ echo "__version__ = \"0.0.1\"" > pytest-pve-cloud/src/pve_cloud_test/_version.py
 
 # then run `tddog --recursive` from the root dir
 
+# pass --skip-kubespray to cut down 50% of e2e time after initial create
 (cd ansible_collections/pxc/cloud && pytest -s tests/e2e/ --skip-cleanup)
 (cd terraform-pxc-controller && pytest -s tests/e2e/ --skip-cleanup)
 (cd terraform-pxc-backup && pytest -s tests/e2e/ --skip-cleanup)
