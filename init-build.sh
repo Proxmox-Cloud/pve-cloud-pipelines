@@ -13,8 +13,9 @@ if [[ "$build_type" == "rc" ]]; then
   # create / switch to rc branch
   git checkout "$new_tag-rc" >&2 || git checkout -b "$new_tag-rc" >&2
 
-  # merge in latest master state and push it
-  git merge $source_branch >&2 && git push origin $new_tag-rc >&2
+  # force merge in latest master state and push it
+  git merge -X theirs $source_branch --no-edit >&2
+  git push origin $new_tag-rc >&2
 
   # get latest rc release tag on the branch
   new_rc_tag=$(/scripts/get-new-rc-tag.sh $new_tag)
