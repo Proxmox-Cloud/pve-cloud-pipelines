@@ -162,6 +162,8 @@ echo "__version__ = \"0.0.1\"" > pytest-pve-cloud/src/pve_cloud_test/_version.py
 (cd ansible_collections/pxc/cloud && pytest -s tests/e2e/ --skip-cleanup)
 (cd terraform-pxc-controller && pytest -s tests/e2e/ --skip-cleanup)
 (cd terraform-pxc-backup && pytest -s tests/e2e/ --skip-cleanup)
+
+# manual full/partial teardown => run commands without --skip-cleanup flags and optionally --fixture-tags flag to limit destruction
 ```
 * core-repos.sh => run git commands for core pve cloud repositories (e.g. switching to / creating of stable brances )
 ```bash
