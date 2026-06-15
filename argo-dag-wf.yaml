@@ -115,7 +115,7 @@ spec:
           - name: downstream-terraform-pxc-backup
             template: terraform-pxc-backup-entry
 
-    # all steps only build on a full release - building rcs fucks e2e and local scenarios
+    # all steps only build on a full release - building rcs messes with e2e and local scenarios
     - name: pytest-pve-cloud-entry
       steps:
         - - name: init-pytest-pve-cloud
