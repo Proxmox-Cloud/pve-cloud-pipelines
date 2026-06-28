@@ -140,52 +140,6 @@ docker push tobiashvmz/pve-cloud-argoci:$VERSION
 # update .gitlab-ci.yml to reference this image
 ```
 
+## Setup workspace
 
-## Convinience Scripts
-
-
-Copy these on the top level of your pve-cloud folder:
-
-
-* test-all.sh => run e2e tests for the entire collection (run `tddog --recursive`)
-```bash
-#!/bin/bash
-set -e
-
-echo "__version__ = \"0.0.1\"" > pytest-pve-cloud/src/pve_cloud_test/_version.py
-(cd pytest-pve-cloud && pip install -e .)
-
-(cd ansible_collections/pxc/cloud && pytest -s tests/e2e/ --skip-cleanup --skip-runner-tags kubespray) 
-(cd terraform-pxc-controller && pytest -s tests/e2e/ --skip-cleanup)
-(cd terraform-pxc-backup && pytest -s tests/e2e/ --skip-cleanup)
-
-# kubernetes reset while keeping mirror vm: (cd ansible_collections/pxc/cloud && pytest -s tests/e2e/ --skip-fixture-tags mirror --skip-runner-tags kubespray) 
-```
-* core-repos.sh => run git commands for core pve cloud repositories (e.g. switching to / creating of stable brances )
-```bash
-#!/bin/bash
-
-# this includes all repositories that contain the core proxmox cloud collection
-# pipelines and forks are not included
-DIRS=(
-  "terraform-pxc-controller" 
-  "terraform-pxc-backup" 
-  "terraform-provider-pxc"
-  "pve-cloud-schemas"
-  "pytest-pve-cloud"
-  "py-pve-cloud"
-  "pve-cloud-controller"
-  "pve-cloud-backup"
-  "ansible_collections/pxc/cloud"
-)
-
-for dir in "${DIRS[@]}"; do
-    (cd "$dir" && eval "$@")
-done
-```
-* python interpreter vscode config `.vscode/settings.json`
-```json
-{
-    "python.defaultInterpreterPath": "${env:HOME}/.pve-cloud-dev-venv/bin/python"
-}
-```
+`cp -rf ws-files/. ../` (into holding pve-cloud folder with .projectile file for emacs).
