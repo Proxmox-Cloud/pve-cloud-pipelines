@@ -142,4 +142,10 @@ docker push tobiashvmz/pve-cloud-argoci:$VERSION
 
 ## Setup workspace
 
-`cp -rf ws-files/. ../` (into holding pve-cloud folder with .projectile file for emacs).
+hardlink ws-files into the .projectile workspace folder:
+
+``` sh
+for f in ws-files/.* ws-files/*; do
+    ln "$f" ../
+done
+```
