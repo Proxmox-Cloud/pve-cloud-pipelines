@@ -301,11 +301,21 @@ spec:
           # for prod releases we simply commit the new version into the source branch
 
           # use pessimistic constraint for e2e tests and some flexibility on prod
-          sed -i "s/^pve-cloud-schemas==.*$/pve-cloud-schemas==${build_tag}/" meta/ee-requirements.txt
           sed -i "s/^pip install pve-cloud-schemas==.*$/pip install pve-cloud-schemas==${build_tag}/" mkdocs-gen.sh
           git add meta/ee-requirements.txt mkdocs-gen.sh
 
           git commit -m "Update pve-cloud-schemas version to $build_tag"
+          git push origin {{workflow.parameters.source_branch}}
+
+          # update py-pve-cloud
+          cd .. && git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/py-pve-cloud.git && cd py-pve-cloud
+
+          # pessimistic version constraint
+          PESSIMISTIC_CONSTRAINT=$(/scripts/get-pessimistic-semver.sh $build_tag)
+          sed -i "s/\"pve-cloud-schemas>=.*\"/\"pve-cloud-schemas>=${build_tag},<${PESSIMISTIC_CONSTRAINT}\"/" pyproject.toml
+          git add pyproject.toml
+
+          git commit -m "Update pve-cloud-schemas version to $build_tag (pessimistic)"
           git push origin {{workflow.parameters.source_branch}}
 
 
