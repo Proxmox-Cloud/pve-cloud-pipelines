@@ -150,9 +150,9 @@ spec:
               parameters:
               - name: build-tag
                 value: "{{steps.init-pve-cloud-schemas.outputs.parameters.build-tag}}"
-        - - name: downstream-pve-cloud-collection
+        - - name: downstream-py-pve-cloud
             when: "{{workflow.parameters.build_type}} == release"
-            template: pve-cloud-collection-entry
+            template: py-pve-cloud-entry
 
 
     # we need full dag graph since we have diamond problem dependencies
