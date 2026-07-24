@@ -32,6 +32,9 @@ spec:
   serviceAccountName: argo-workflow 
   templates:
     # entry points
+    # templates ending in -entry => contain rc and release build variants
+    # templates ending in -release => can only be build as a full prod release
+    # no rc support
     - name: pve-cloud-collection-entry
       steps:  
         - - name: init-pve-cloud-collection
@@ -116,7 +119,7 @@ spec:
             template: terraform-pxc-backup-entry
 
     # all steps only build on a full release - building rcs messes with e2e and local scenarios
-    - name: pytest-pve-cloud-entry
+    - name: pytest-pve-cloud-release
       steps:
         - - name: init-pytest-pve-cloud
             template: init-build-generic
@@ -134,7 +137,7 @@ spec:
                 value: "{{steps.init-pytest-pve-cloud.outputs.parameters.build-tag}}"
 
     # cloud schemas is so simply of a library that we dont need a rc build
-    - name: pve-cloud-schemas-entry
+    - name: pve-cloud-schemas-release
       steps:  
         - - name: init-pve-cloud-schemas
             template: init-build-generic
@@ -150,9 +153,12 @@ spec:
               parameters:
               - name: build-tag
                 value: "{{steps.init-pve-cloud-schemas.outputs.parameters.build-tag}}"
-        - - name: downstream-py-pve-cloud
-            when: "{{workflow.parameters.build_type}} == release"
-            template: py-pve-cloud-entry
+        # experimental comment out, since this is release only we dont want to trigger downstream
+        # automatically just build this and then have to trigger py-pve-cloud-entry manually again
+        # with the option for rc build
+        # - - name: downstream-py-pve-cloud
+        #     when: "{{workflow.parameters.build_type}} == release"
+        #     template: py-pve-cloud-entry
 
 
     # we need full dag graph since we have diamond problem dependencies
@@ -187,7 +193,7 @@ spec:
             dependencies: [pve-cloud-controller, terraform-provider-pxc]
           
           - name: pytest-pve-cloud
-            template: pytest-pve-cloud-entry
+            template: pytest-pve-cloud-release
             dependencies: [py-pve-cloud]
 
 
