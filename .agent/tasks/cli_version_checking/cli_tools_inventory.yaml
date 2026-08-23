@@ -1,0 +1,426 @@
+# Machine-readable CLI tool inventory
+# Format: tool_name -> list of locations where it's used
+# Each location includes: type (ansible/python/go), file_path, lines, usage_context
+
+cli_tools:
+  # === PROXMOX VE TOOLS ===
+  qm:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/bootstrap_vm/tasks/main.yml
+        lines: [4, 19, 22, 77, 81, 85, 89, 93, 105, 119, 136, 147, 151]
+        context: "vm create/set/start/config/destroy"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/bootstrap_vm/tasks/generate_cinit_net_cfg.yml
+        lines: [2]
+        context: "qm config"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/set_memory_facts/tasks/main.yml
+        lines: [3]
+        context: "qm list, qm config"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/destroy_qemus.yaml
+        lines: [14, 20]
+        context: "qm stop/status/destroy"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_qemus.yaml
+        lines: [30, 36]
+        context: "qm stop/status/destroy"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_kubespray.yaml
+        lines: [30, 36, 79]
+        context: "qm stop/status/destroy, qm set --delete"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/destroy_kubespray.yaml
+        lines: [14, 20]
+        context: "qm stop/status/destroy"
+
+  pct:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/bootstrap_lxc/tasks/main.yml
+        lines: [16, 27, 30, 33]
+        context: "pct list/config/create/set/start"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/set_memory_facts/tasks/main.yml
+        lines: [11]
+        context: "pct list, pct config"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/destroy_lxcs.yaml
+        lines: [16, 24]
+        context: "pct stop/status/destroy"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_lxcs.yaml
+        lines: [28, 36]
+        context: "pct stop/status/destroy"
+
+  pvesh:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/bootstrap_vm/tasks/main.yml
+        lines: [4]
+        context: "pvesh get /cluster/nextid"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/bootstrap_lxc/tasks/main.yml
+        lines: [16]
+        context: "pvesh get /cluster/nextid"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/determine_vms_create_delete/tasks/main.yml
+        lines: [6]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/destroy_qemus.yaml
+        lines: [7]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/destroy_lxcs.yaml
+        lines: [9]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/destroy_kubespray.yaml
+        lines: [7]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_qemus.yaml
+        lines: [70]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_lxcs.yaml
+        lines: [70]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_kubespray.yaml
+        lines: [70]
+        context: "pvesh get /cluster/resources --type vm"
+      - type: python
+        file: ansible_collections/pxc/cloud/plugins/module_utils/inventory.py
+        lines: [105, 110, 369]
+        context: "pvesh get /cluster/resources, /cluster/ha/groups, agent/network-get-interfaces"
+
+  pveam:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/bootstrap_lxc/tasks/main.yml
+        lines: [13]
+        context: "pveam download local"
+
+  # === CEPH / RBD TOOLS ===
+  rbd:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: pve-cloud-backup/src/pve_cloud_backup/fetcher/funcs.py
+        lines: [126, 143, 165, 189, 213, 362, 376, 390]
+        context: "rbd group create/image add/snap ls/clone/group snap create/rm/group rm"
+      - type: python
+        file: pve-cloud-backup/src/pve_cloud_backup/daemon/restore.py
+        lines: [769, 830, 841]
+        context: "rbd import/rm"
+
+  ceph:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/slurp_cluster_secrets/tasks/main.yml
+        lines: [35]
+        context: "ceph fsid"
+      - type: python
+        file: pve-cloud-backup/src/pve_cloud_backup/daemon/restore.py
+        lines: [259]
+        context: "ceph osd pool ls detail"
+
+  # === BACKUP TOOLS ===
+  borg:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: pve-cloud-backup/src/pve_cloud_backup/daemon/funcs.py
+        lines: [34, 68]
+        context: "borg init/list"
+      - type: python
+        file: pve-cloud-backup/src/pve_cloud_backup/daemon/bdd.py
+        lines: [101, 180, 329]
+        context: "borg create/delete/extract"
+
+  # === CONTAINER & IMAGE TOOLS ===
+  skopeo:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/mirror_container_image/tasks/main.yml
+        lines: [4, 13]
+        context: "skopeo inspect/copy"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/mirror_helm_chart/tasks/main.yml
+        lines: [4]
+        context: "skopeo inspect --raw"
+      - type: python
+        file: pve-cloud-controller/src/pve_cloud_ctrl/pod_watcher.py
+        lines: [82]
+        context: "skopeo copy"
+      - type: python
+        file: pve-cloud-controller/src/pve_cloud_ctrl/adm.py
+        lines: [75]
+        context: "skopeo inspect --raw"
+      - type: go
+        file: terraform-provider-pxc/internal/provider/helm_mirror_resource.go
+        lines: [174]
+        context: "skopeo inspect --raw"
+
+  helm:
+    required_version: "v4.2.0"
+    has_version_check: true
+    check_scope: "control_node_only"
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/mirror_helm_chart/tasks/main.yml
+        lines: [24, 27, 30, 40]
+        context: "helm repo add/update/pull/push"
+      - type: go
+        file: terraform-provider-pxc/internal/provider/helm_mirror_resource.go
+        lines: [302, 310, 319, 328, 336]
+        context: "helm repo add/update/pull/push"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_control_node.yaml
+        lines: [60, 92]
+        context: "helm install (control node setup)"
+
+  docker:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: pytest-pve-cloud/src/pve_cloud_test/tdd_watchdog.py
+        lines: [501]
+        context: "docker start"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_kubespray.yaml
+        lines: [260]
+        context: "docker availability check (pipe lookup)"
+
+  kubectl:
+    required_version: "v1.36.0"
+    has_version_check: true
+    check_scope: "control_node_only"
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_kubespray.yaml
+        lines: [438]
+        context: "kubectl kustomize"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_control_node.yaml
+        lines: [27, 51]
+        context: "kubectl install (control node setup)"
+
+  # === PACKAGE MANAGEMENT ===
+  apt:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/vector_journald_exporter/tasks/main.yml
+        lines: [94]
+        context: "apt update/install"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/setup_pxzfs_localpv_zpool/tasks/main.yml
+        lines: [28]
+        context: "apt install"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_postgres.yaml
+        lines: [54]
+        context: "pip install patroni"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_kea.yaml
+        lines: [71]
+        context: "curl install (via pipe to bash)"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_ceph_kea.yaml
+        lines: [20]
+        context: "curl install (via pipe to bash)"
+
+  pip:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_postgres.yaml
+        lines: [54]
+        context: "pip install patroni"
+      - type: python
+        file: pytest-pve-cloud/src/pve_cloud_test/tdd_watchdog.py
+        lines: [365]
+        context: "pip install -e ."
+      - type: go
+        file: terraform-provider-pxc/internal/provider/provider.go
+        lines: [284]
+        context: "pip install grpc-pve-cloud"
+
+  dkms:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/setup_pxzfs_localpv_zpool/tasks/main.yml
+        lines: [32]
+        context: "dkms autoinstall"
+
+  # === SYSTEM MANAGEMENT ===
+  systemctl:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/alternate_ssh_port/tasks/main.yml
+        lines: [11]
+        context: "systemctl mask/disable/enable"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/btrfs_prom_exporter/tasks/main.yml
+        lines: [15]
+        context: "systemctl daemon-reload"
+
+  journalctl:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/install_log2ram/tasks/main.yml
+        lines: [15]
+        context: "journalctl --vacuum-size"
+
+  # === NETWORK & DATA TRANSFER ===
+  rsync:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_kubespray.yaml
+        lines: [254, 333]
+        context: "rsync -avz"
+      - type: python
+        file: pytest-pve-cloud/src/pve_cloud_test/terraform.py
+        lines: [116, 121]
+        context: "rsync -avz"
+
+  curl:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_kea.yaml
+        lines: [71]
+        context: "curl install script"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_ceph_kea.yaml
+        lines: [20]
+        context: "curl install script"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/vector_journald_exporter/tasks/main.yml
+        lines: [94]
+        context: "curl setup script"
+
+  avahi_browse:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: py-pve-cloud/src/pve_cloud/lib/inventory.py
+        lines: [30]
+        context: "avahi-browse -rpt _pxc._tcp"
+
+  # === CRYPTOGRAPHY & DNS ===
+  openssl:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_pve_clusters.yaml
+        lines: [314, 337, 344, 351]
+        context: "openssl genrsa/req/x509/rand"
+
+  tsig_keygen:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/setup_pve_clusters.yaml
+        lines: [306]
+        context: "tsig-keygen internal."
+
+  # === DISK & BLOCK DEVICE ===
+  lsblk:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/playbooks/sync_kubespray.yaml
+        lines: [385]
+        context: "lsblk --json -o NAME,PATH,SERIAL,FSTYPE"
+
+  # === VERSION CONTROL ===
+  git:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: pytest-pve-cloud/src/pve_cloud_test/tdd_watchdog.py
+        lines: [22, 30, 142, 250]
+        context: "git tag/branch/clone"
+      - type: python
+        file: pve-cloud-backup/src/pve_cloud_backup/fetcher/git.py
+        lines: [18]
+        context: "git clone"
+
+  # === APT REPOSITORY ===
+  aptly:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: ansible
+        file: ansible_collections/pxc/cloud/roles/aptly_mirror_repo/tasks/main.yml
+        lines: [4, 12, 16, 20, 24, 28, 40, 44, 48, 52, 56, 60]
+        context: "aptly mirror/snapshot/publish operations"
+
+  # === TERRAFORM ===
+  terraform:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: pytest-pve-cloud/src/pve_cloud_test/terraform.py
+        lines: [158, 166, 209]
+        context: "terraform init/apply/destroy"
+
+  # === MISCELLANEOUS ===
+  cat:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: python
+        file: py-pve-cloud/src/pve_cloud/cli/pxrpc.py
+        lines: [102, 115, 126]
+        context: "cat /etc/pve/cloud/*"
+      - type: ansible
+        file: ansible_collections/pxc/cloud/plugins/module_utils/inventory.py
+        lines: [100]
+        context: "cat /etc/pve/cloud/cluster_vars.yaml"
+
+  terraform_provider_pxc:
+    required_version: null
+    has_version_check: false
+    usages:
+      - type: go
+        file: terraform-provider-pxc/internal/provider/provider.go
+        lines: [302]
+        context: "pcrpc binary execution"

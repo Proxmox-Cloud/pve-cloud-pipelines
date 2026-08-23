@@ -148,4 +148,7 @@ hardlink ws-files into the .projectile workspace folder:
 for f in ws-files/.* ws-files/*; do
     ln "$f" ../
 done
+
+# symlink .agent folder for agent outputs / planning
+ln -sr .agent ../.agent # here we use a symlink
 ```
