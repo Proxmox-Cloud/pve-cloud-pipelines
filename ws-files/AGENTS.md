@@ -26,7 +26,7 @@ tddog
 
 ## Running Tests / Validation
 
-For testing you should exclusively rely on the e2e testing suite of this project. Do not create dummy test files / playbooks, find the best existing test case and run it.
+For testing you should primary rely on the e2e testing suite of this project.
 
 Always pass the flag `--skip-cleanup` to any `pytest` command you execute. Tests always live in the `tests/e2e` folder and are run from the repositories root directory
 
@@ -60,6 +60,8 @@ If you made changes to multiple source repositories, simply run `tddog --recursi
 ```
 
 You should always assume that there is a already deployed test system running and that you only work on specific features.
+
+When the e2e test invocation fails on the first run because of the `configure_pxc_ansible_cfg` simply run the e2e test command again.
 
 ### Custom pytest CLI options
 
