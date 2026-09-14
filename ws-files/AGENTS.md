@@ -6,7 +6,7 @@
 
 ```bash
 source .envrc
-source ../.pve-cloud-dev-venv/bin/activate
+source $HOME/.pve-cloud-dev-venv/bin/activate
 ```
 
 ## Python & Ansible Environment
@@ -25,6 +25,8 @@ tddog
 
 
 ## Running Tests / Validation
+
+**You always need to run atleast one fitting test from the e2e suite to validate your changes!**
 
 For testing you should primary rely on the e2e testing suite of this project.
 
