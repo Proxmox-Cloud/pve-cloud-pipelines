@@ -1,0 +1,10 @@
++ansible_collections/pxc/cloud
++pve-cloud-awx-cron
++pve-cloud-backup
++pve-cloud-controller
++pve-cloud-pipelines
++pve-cloud-schemas
++pytest-pve-cloud
++terraform-provider-pxc
++terraform-pxc-backup
++terraform-pxc-controller
