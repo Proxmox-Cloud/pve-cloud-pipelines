@@ -122,12 +122,8 @@ spec:
     - name: pytest-pve-cloud-release
       steps:  
         - - name: init-pytest-pve-cloud
-            template: init-build-generic
+            template: init-pytest-pve-cloud
             when: "{{workflow.parameters.build_type}} == release"
-            arguments:
-              parameters:
-              - name: repo-name
-                value: pytest-pve-cloud
         - - name: build-pytest-pve-cloud-pypi
             template: build-pytest-pve-cloud-pypi
             when: "{{workflow.parameters.build_type}} == release"
@@ -846,6 +842,62 @@ spec:
           fi
 
           # artifact for following steps
+          echo $build_tag > /tmp/build-tag
+
+      outputs:
+        parameters:
+          - name: build-tag
+            valueFrom:
+              path: /tmp/build-tag
+
+    # pytest-pve-cloud init
+    - name: init-pytest-pve-cloud
+      retryStrategy:
+        limit: "2"
+        retryPolicy: "OnFailure"
+        backoff:
+          duration: "2m"
+      script:
+        image: tobiashvmz/pve-cloud-pyci:202606072330 
+        command: [bash]
+        volumeMounts:
+          # pulling gitlab currently only works with ed25519 key
+          - name: pxc-ci-secrets
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+        source: |
+          #!/bin/bash
+          set -e
+
+          # set git user / email for creating commits
+          git config --global user.name "{{workflow.parameters.git_user}}"
+          git config --global user.email "{{workflow.parameters.git_email}}"
+
+          # trust host for ssh pulls
+          ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
+
+          git clone --branch {{workflow.parameters.source_branch}} {{workflow.parameters.git_pull_prefix}}/pytest-pve-cloud.git && cd pytest-pve-cloud
+
+          new_tag=$(/scripts/get-new-tag.sh {{workflow.parameters.build_increment}} {{workflow.parameters.source_branch}})
+
+          echo "new tag based on build_increment: $new_tag"
+          
+          # update terraform integration testing module version
+          cd terraform/integration-testing-ns
+
+          sed -i "s/var\.test_integration_version\s==\s\?\snull\s?\s\".*\"/var.test_integration_version == null ? \"${new_tag}\"/" variables.tf
+          git add variables.tf
+
+          git commit -m "Update test_integration_version to $new_tag"
+          git push origin {{workflow.parameters.source_branch}}
+
+          # create the tag and push it
+          git tag "$new_tag"
+          git push origin "$new_tag"
+
+          # return build tag as artifact
+          build_tag=$new_tag
+
           echo $build_tag > /tmp/build-tag
 
       outputs:
