@@ -120,7 +120,7 @@ spec:
 
     # all steps only build on a full release - building rcs messes with e2e and local scenarios
     - name: pytest-pve-cloud-release
-      steps:
+      steps:  
         - - name: init-pytest-pve-cloud
             template: init-build-generic
             when: "{{workflow.parameters.build_type}} == release"
@@ -130,6 +130,13 @@ spec:
                 value: pytest-pve-cloud
         - - name: build-pytest-pve-cloud-pypi
             template: build-pytest-pve-cloud-pypi
+            when: "{{workflow.parameters.build_type}} == release"
+            arguments:
+              parameters:
+              - name: build-tag
+                value: "{{steps.init-pytest-pve-cloud.outputs.parameters.build-tag}}"
+        - - name: build-pytest-pve-cloud-image
+            template: build-pytest-pve-cloud-image
             when: "{{workflow.parameters.build_type}} == release"
             arguments:
               parameters:
@@ -324,6 +331,42 @@ spec:
           git commit -m "Update pve-cloud-schemas version to $build_tag (pessimistic)"
           git push origin {{workflow.parameters.source_branch}}
 
+
+    # pytest-pve-cloud image
+    - name: build-pytest-pve-cloud-image
+      inputs:
+        parameters:
+        - name: build-tag
+      script:
+        image: docker.io/tobiashvmz/pve-cloud-pdci:202606072330 
+        command: [bash]
+        securityContext:
+          privileged: true
+        env:
+          - name: DOCKER_AUTH_CONFIG_B64
+            valueFrom:
+              secretKeyRef:
+                name: pxc-ci-secrets
+                key: docker_auth_config_b64
+        volumeMounts:
+          # pulling gitlab currently only works with ed25519 key
+          - name: pxc-ci-secrets
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+        source: |
+          #!/bin/bash
+          set -e
+
+          # trust host for ssh pulls
+          ssh-keyscan {{workflow.parameters.git_host}} >> ~/.ssh/known_hosts
+
+          # checkout repo at build tag
+          git clone --branch {{inputs.parameters.build-tag}} --depth 1 {{workflow.parameters.git_pull_prefix}}/pytest-pve-cloud.git && cd pytest-pve-cloud
+
+          mkdir -p /root/.config/containers
+          echo $DOCKER_AUTH_CONFIG_B64 | base64 -d > /root/.config/containers/auth.json
+          podman build --layers -t tobiashvmz/pxc-integration:{{inputs.parameters.build-tag}} .
+          podman push tobiashvmz/pxc-integration:{{inputs.parameters.build-tag}}
 
     # pytest-pve-cloud pypi packe
     - name: build-pytest-pve-cloud-pypi
